@@ -20,7 +20,7 @@
   <customize:append id="formFreemarkerConfigurerAutoImportsCustomizer" bean="freemarkerConfigurer"
                     property="autoImports">
     <map>
-      <entry key="form" value="/lib/form/form.ftl"/>
+      <entry key="formFacadeWrapper" value="/lib/form/form.ftl"/>
     </map>
   </customize:append>
 
