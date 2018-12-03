@@ -38,6 +38,7 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
   static final String FORM_DATA_VALIDATOR = "validator";
   private static final String FORM_DATA_NAME = "name";
   private static final String FORM_DATA_HINT = "hint";
+  private static final String FORM_DATA_TECNAME = "technicalName";
   static final String FORM_VALIDATOR_MANDATORY = "mandatory";
   static final String FORM_VALIDATOR_MINSIZE = "minSize";
   static final String FORM_VALIDATOR_MAXSIZE = "maxSize";
@@ -79,6 +80,8 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
 
     formElement.setName(parseString(elementData, FORM_DATA_NAME));
     formElement.setHint(parseString(elementData, FORM_DATA_HINT));
+    formElement.setTecName(parseString(elementData, FORM_DATA_TECNAME));
+
     formElement.setId(id);
   }
 

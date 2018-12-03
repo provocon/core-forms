@@ -35,6 +35,7 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   private String id;
   private String name;
   private String hint;
+  private String tecName;
   private T value;
   private V validator;
   private final Class<T> type;
@@ -107,6 +108,16 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   @Override
   public void setName(String name) {
     this.name = name;
+  }
+
+  @Override
+  public String getTecName() {
+    return StringUtils.isNotEmpty(this.tecName) ? this.tecName : this.getTechnicalName();
+  }
+
+  @Override
+  public void setTecName(String tecName) {
+    this.tecName = tecName;
   }
 
   @Override

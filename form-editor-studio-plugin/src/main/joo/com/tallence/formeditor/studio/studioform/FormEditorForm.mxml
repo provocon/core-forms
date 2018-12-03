@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<editor:DocumentTabPanel
+<local:FormEditorFormBase
     xmlns:fx="http://ns.adobe.com/mxml/2009"
     xmlns:exml="http://www.jangaroo.net/exml/0.8"
     xmlns="exml:ext.config"
+    xmlns:local="com.tallence.formeditor.studio.studioform.*"
     xmlns:editor="exml:com.coremedia.cms.editor.sdk.config"
     xmlns:formeditor="exml:com.tallence.formeditor.studio.config"
     xmlns:bpforms="exml:com.coremedia.blueprint.studio.config"
-    xmlns:media="com.coremedia.blueprint.studio.forms.media.*" xmlns:ui="exml:com.coremedia.ui.config">
+    xmlns:media="com.coremedia.blueprint.studio.forms.media.*"
+    xmlns:ui="exml:com.coremedia.ui.config">
   <fx:Metadata>
     [ResourceBundle('com.coremedia.blueprint.studio.BlueprintTabs')]
     [ResourceBundle('com.tallence.formeditor.studio.bundles.FormEditor')]
@@ -38,6 +40,7 @@
       {formElementType: TextOnlyEditor.FIELD_TYPE, group: 'hint'},
       {formElementType: ConsentFormCheckBoxEditor.FIELD_TYPE, group: 'single'}
     ];
+    /*
     private static const FORM_ACTIONS:Array = [
       {
         id: 'default',
@@ -48,13 +51,13 @@
         value: ResourceManager.getInstance().getString("com.tallence.formeditor.studio.bundles.FormEditor", "FormEditor_actions_mail")
       }
     ];
-
+*/
     private var config:FormEditorForm;
 
     public native function FormEditorForm(config:FormEditorForm = null);
     ]]></fx:Script>
 
-  <editor:items>
+  <local:items>
     <editor:DocumentForm
         title="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_tab_content_title')}">
       <editor:items>
@@ -90,7 +93,8 @@
                                 displayField="value"
                                 width="100%"
                                 valueField="id"
-                                editable="false">
+                                editable="false"
+                                store="{getStore()}">
                 <ui:plugins exml:mode="append">
                   <ui:BindPropertyPlugin
                       bindTo="{config.bindTo.extendBy('properties', 'formAction')}"
@@ -98,11 +102,13 @@
                       bidirectional="true"
                       componentEvent="select"/>
                 </ui:plugins>
+              <!--
                 <ui:store>
                   <store_Json
                       fields="{['id', 'value']}"
                       data="{FORM_ACTIONS}"/>
                 </ui:store>
+                -->
               </ui:LocalComboBox>
             <editor:StringPropertyField propertyName="adminMails"/>
           </editor:items>
@@ -142,6 +148,6 @@
       </editor:items>
     
     </editor:DocumentForm>
-  </editor:items>
+  </local:items>
 
-</editor:DocumentTabPanel>
+</local:FormEditorFormBase>

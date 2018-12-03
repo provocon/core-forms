@@ -6,6 +6,7 @@
 
   <fx:Script><![CDATA[
     import com.coremedia.ui.data.ValueExpression;
+    import com.tallence.formeditor.studio.FormUtils;
     import com.tallence.formeditor.studio.model.FormElementStructWrapper;
 
     public static const xtype:String = "com.tallence.formeditor.studio.elements.numberFieldEditor";
@@ -29,6 +30,14 @@
   <items>
     <Container cls="content">
       <items>
+
+        <fields:TextField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_technicalName_label')}"
+                          emptyText="{FormUtils.getTecName(config.formElement)}"
+                          defaultValue="{FormUtils.getTecName(config.formElement)}"
+                          formElement="{config.formElement}"
+                          propertyname="technicalName"
+                          bindTo="{config.bindTo}"
+                          forceReadOnlyValueExpression="{config.forceReadOnlyValueExpression}"/>
 
         <fields:TextField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_name_label')}"
                           emptyText="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_name_emptyText')}"

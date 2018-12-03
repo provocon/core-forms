@@ -18,6 +18,7 @@ package com.tallence.formeditor.studio {
 
 import com.coremedia.cms.editor.sdk.editorContext;
 import com.coremedia.cms.editor.sdk.preview.PreviewPanel;
+import com.tallence.formeditor.studio.model.FormElementStructWrapper;
 
 import ext.panel.Panel;
 
@@ -45,6 +46,10 @@ public class FormUtils {
     keyToUse = keyToUse.charAt(0).toLowerCase() + keyToUse.substring(1);
     return ResourceManager.getInstance().getString("com.tallence.formeditor.studio.bundles.FormEditor",
             'FormEditor_label_element_' + keyToUse) || key;
+  }
+
+  public static function getTecName(fe:FormElementStructWrapper):String {
+      return fe.getType() + "_" + fe.getId();
   }
 
 }

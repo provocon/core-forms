@@ -35,6 +35,10 @@ public interface FormElement<T> {
 
   void setName(String name);
 
+  String getTecName();
+
+  void setTecName(String tecName);
+
   /**
    * @return a unique technical name for this form element which is human readable.
    */

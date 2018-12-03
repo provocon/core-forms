@@ -28,7 +28,7 @@
     public var propertyname:String;
 
     [Bindable]
-    public var defaultValue:String = "";
+    public var defaultValue:String;
 
     public native function TextField(config:TextField = null);
     ]]>
@@ -37,6 +37,7 @@
   <fields:plugins>
     <ui:BindPropertyPlugin bidirectional="true"
                            skipIfUndefined="true"
+                           ifUndefined="{config.defaultValue}"
                            bindTo="{getTextVE(config)}"/>
     <editor:BindDisablePlugin bindTo="{config.bindTo}"
                               forceReadOnlyValueExpression="{config.forceReadOnlyValueExpression}"/>
