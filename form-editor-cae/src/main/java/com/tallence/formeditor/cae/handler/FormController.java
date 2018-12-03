@@ -24,7 +24,15 @@ import com.tallence.formeditor.cae.actions.DefaultFormAction;
 import com.tallence.formeditor.cae.actions.FormAction;
 import com.tallence.formeditor.cae.elements.FileUpload;
 import com.tallence.formeditor.cae.elements.FormElement;
+import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
+import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
 import com.tallence.formeditor.contentbeans.FormEditor;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -40,16 +48,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
-import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
-
 /**
  * Handler for Form-Requests for {@link FormEditor}s.
  */
@@ -60,7 +58,7 @@ public class FormController {
 
   private static final Logger LOG = LoggerFactory.getLogger(FormController.class);
 
-  private static final String FORMS_ROOT_URL_SEGMENT = "/dynamic/forms";
+  private static final String FORMS_ROOT_URL_SEGMENT = "/d/forms";
 
   private static final String PROCESS_SOCIAL_FORM_VIEW = "formEditorSubmit";
   static final String PROCESS_SOCIAL_FORM = FORMS_ROOT_URL_SEGMENT + "/" + PROCESS_SOCIAL_FORM_VIEW + "/{currentContext}/{target}";
