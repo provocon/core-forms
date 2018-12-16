@@ -100,7 +100,7 @@ public class FormController {
       List<String> validationResult = formElement.getValidationResult();
       if (!validationResult.isEmpty()) {
         //This should not happen, since a client side validation is expected.
-        LOG.warn("Validation failed for Form [{}]. Validation-Result: [{}]", target.getContentId(), validationResult);
+        LOG.warn("Validation failed for field {} in form {}: {}",formElement.getName(), target.getContentId(), validationResult);
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return new FormProcessingResult(false, SERVER_VALIDATION);
       }
