@@ -18,8 +18,11 @@ package com.tallence.formeditor.cae;
 
 import com.coremedia.cap.struct.Struct;
 import com.tallence.formeditor.cae.elements.FormElement;
+import com.tallence.formeditor.cae.handler.ReCaptchaService;
 import com.tallence.formeditor.contentbeans.FormEditor;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +35,11 @@ public class FormFreemarkerFacade {
 
   private final FormElementFactory formElementFactory;
 
-  public FormFreemarkerFacade(FormElementFactory formElementFactory) {
+  @Autowired
+  private final ReCaptchaService reCaptchaService;
+
+  public FormFreemarkerFacade(FormElementFactory formElementFactory, ReCaptchaService pReCaptchaService) {
+    this.reCaptchaService = pReCaptchaService;
     this.formElementFactory = formElementFactory;
   }
 
@@ -48,6 +55,10 @@ public class FormFreemarkerFacade {
         .filter(e -> e.getValue() instanceof Struct)
         .map(e -> parseElement((Struct) e.getValue(), e.getKey()))
         .collect(Collectors.toList());
+  }
+
+  public String getReCaptchaWebsiteSecretForSite() {
+    return reCaptchaService.getWebsiteSecretForSite(null);
   }
 
   private FormElement parseElement(Struct value, String key) {
