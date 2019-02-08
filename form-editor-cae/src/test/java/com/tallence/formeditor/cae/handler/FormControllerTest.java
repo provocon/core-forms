@@ -16,9 +16,12 @@
 package com.tallence.formeditor.cae.handler;
 
 import com.tallence.formeditor.cae.FormTestConfiguration;
+import static com.tallence.formeditor.cae.handler.FormController.PROCESS_SOCIAL_FORM;
 import com.tallence.formeditor.cae.mocks.MailAdapterMock;
 import com.tallence.formeditor.cae.mocks.StorageAdapterMock;
+import java.net.URI;
 import org.junit.After;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,19 +31,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
-
-import static com.tallence.formeditor.cae.handler.FormController.PROCESS_SOCIAL_FORM;
-import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test for {@link FormController}
@@ -91,14 +89,14 @@ public class FormControllerTest {
   public void testValidPost() throws Exception {
 
     mvc.perform(fileUpload(TEST_URL)
-        .param("TextField", "12345")
-        .param("NumberField", "18")
-        .param("RadioButtonsMandatory", "12345")
-        .param("CheckBoxesMandatory", "12345")
-        .param("SelectBoxMandatory", "12345")
-        .param("TextArea", "ist Text")
-        .param("UsersMail", MAIL_ADDRESS_TEST)
-        .param("ConsentFormCheckBox", "on")
+        .param("TextField_TextField", "12345")
+        .param("NumberField_NumberField", "18")
+        .param("RadioButtonGroup_RadioButtonsMandatory", "12345")
+        .param("CheckBoxesGroup_CheckBoxesMandatory", "12345")
+        .param("SelectBox_SelectBoxMandatory", "12345")
+        .param("TextArea_TextArea", "ist Text")
+        .param("UsersMail_UsersMail", MAIL_ADDRESS_TEST)
+        .param("ConsentFormCheckBox_ConsentFormCheckBox", "on")
     )
         .andExpect(status().is2xxSuccessful())
         .andExpect(content().string("{\"success\":true,\"error\":null}"))
@@ -117,14 +115,14 @@ public class FormControllerTest {
 
     mvc.perform(fileUpload(TEST_URL)
         .file(firstFile)
-        .param("TextField", "12345")
-        .param("NumberField", "18")
-        .param("RadioButtonsMandatory", "12345")
-        .param("CheckBoxesMandatory", "12345")
-        .param("SelectBoxMandatory", "12345")
-        .param("TextArea", "ist Text")
-        .param("UsersMail", MAIL_ADDRESS_TEST)
-        .param("ConsentFormCheckBox", "on")
+        .param("TextField_TextField", "12345")
+        .param("NumberField_NumberField", "18")
+        .param("RadioButtonGroup_RadioButtonsMandatory", "12345")
+        .param("CheckBoxesGroup_CheckBoxesMandatory", "12345")
+        .param("SelectBox_SelectBoxMandatory", "12345")
+        .param("TextArea_TextArea", "ist Text")
+        .param("UsersMail_UsersMail", MAIL_ADDRESS_TEST)
+        .param("ConsentFormCheckBox_ConsentFormCheckBox", "on")
     )
         .andExpect(status().is2xxSuccessful())
         .andExpect(content().string("{\"success\":true,\"error\":null}"))
@@ -141,8 +139,8 @@ public class FormControllerTest {
     URI mailTestUrl = UriComponentsBuilder.fromUriString(PROCESS_SOCIAL_FORM).buildAndExpand("6", "4").toUri();
 
     mvc.perform(post(mailTestUrl)
-        .param("TextArea", "ist Text")
-        .param("UsersMail", MAIL_ADDRESS_TEST)
+        .param("TextArea_TextArea", "ist Text")
+        .param("UsersMail_UsersMail", MAIL_ADDRESS_TEST)
     )
         .andExpect(status().is2xxSuccessful())
         .andExpect(content().string("{\"success\":true,\"error\":null}"))
@@ -158,10 +156,10 @@ public class FormControllerTest {
 
 
   @Test
-  public void testInValidPost() throws Exception {
+  public void testInvalidPost() throws Exception {
 
     //Performing a post with only the TextField given will cause a validation error, because other mandatory fields are missing.
-    mvc.perform(fileUpload(TEST_URL).param("TextField", "12345"))
+    mvc.perform(fileUpload(TEST_URL).param("TextField_TextField", "12345"))
         .andExpect(status().is4xxClientError())
         .andExpect(content().string("{\"success\":false,\"error\":\"server-validation-failed\"}"))
         .andDo(MockMvcResultHandlers.print());
