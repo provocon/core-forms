@@ -28,6 +28,8 @@ public interface FormErrors {
 
   String ADMIN_MAIL = "admin-mail-not-sent";
 
+  String SF_SAVE = "salesforce-save-unsuccessful";
+
   String DB_SAVE = "db-save-unsuccessful";
 
   String USER_MAIL = "user-mail-not-sent";

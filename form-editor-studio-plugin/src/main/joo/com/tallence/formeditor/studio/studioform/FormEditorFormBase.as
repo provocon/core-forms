@@ -14,18 +14,17 @@ public class FormEditorFormBase extends DocumentTabPanel {
   public function getStore():Store {
     var arrayStore:Store = new ArrayStore(ArrayStore({
       data:getFormActionOptions(),
-      fields:['id', 'value']
+      fields:['value', 'id']
     }));
     return arrayStore;
   }
 
 
   public function getFormActionOptions():Array {
-    // TODO: read the array ids and values from settings
       var result:Array = [
       [resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_actions_default'), 'default'],
       [resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_actions_mail'), 'mailAction']
-    ];
+      ];
     return result;
   }
 

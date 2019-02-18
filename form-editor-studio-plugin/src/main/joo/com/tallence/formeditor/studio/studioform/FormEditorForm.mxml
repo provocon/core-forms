@@ -40,18 +40,7 @@
       {formElementType: TextOnlyEditor.FIELD_TYPE, group: 'hint'},
       {formElementType: ConsentFormCheckBoxEditor.FIELD_TYPE, group: 'single'}
     ];
-    /*
-    private static const FORM_ACTIONS:Array = [
-      {
-        id: 'default',
-        value: ResourceManager.getInstance().getString("com.tallence.formeditor.studio.bundles.FormEditor", "FormEditor_actions_default")
-      },
-      {
-        id: 'mailAction',
-        value: ResourceManager.getInstance().getString("com.tallence.formeditor.studio.bundles.FormEditor", "FormEditor_actions_mail")
-      }
-    ];
-*/
+
     private var config:FormEditorForm;
 
     public native function FormEditorForm(config:FormEditorForm = null);
@@ -102,13 +91,6 @@
                       bidirectional="true"
                       componentEvent="select"/>
                 </ui:plugins>
-              <!--
-                <ui:store>
-                  <store_Json
-                      fields="{['id', 'value']}"
-                      data="{FORM_ACTIONS}"/>
-                </ui:store>
-                -->
               </ui:LocalComboBox>
             <editor:StringPropertyField propertyName="adminMails"/>
           </editor:items>
