@@ -46,6 +46,7 @@ public class ProspectServiceFormAction implements FormAction {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProspectServiceFormAction.class);
 
+  @Autowired
   protected final FormEditorProspectServiceAdapter prospectServiceAdapter;
 
   // -------------------------------------------------------------------------------------------------------------------
