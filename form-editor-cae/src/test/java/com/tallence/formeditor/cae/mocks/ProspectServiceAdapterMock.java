@@ -21,6 +21,9 @@ import com.tallence.formeditor.contentbeans.FormEditor;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 /**
  * Mocking the {@link FormEditorProspectServiceAdapter} with an empty implementation.
@@ -36,7 +39,11 @@ public class ProspectServiceAdapterMock implements FormEditorProspectServiceAdap
 
 
     @Override
-    public boolean sendDataToSalesForce(FormEditor target, String formData, List<FormElement> elements) {
+    public boolean sendDataToSalesForce(FormEditor target,
+                                        String formData,
+                                        List<FormElement> elements,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response) {
         return true;
     }
 

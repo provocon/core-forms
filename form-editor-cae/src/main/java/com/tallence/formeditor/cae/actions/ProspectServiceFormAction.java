@@ -49,6 +49,7 @@ public class ProspectServiceFormAction implements FormAction {
   @Autowired
   protected final FormEditorProspectServiceAdapter prospectServiceAdapter;
 
+
   // -------------------------------------------------------------------------------------------------------------------
   //
   // constructor
@@ -79,7 +80,8 @@ public class ProspectServiceFormAction implements FormAction {
 
     //String formData = serializeFormElements(target, formElements, files);
     String formData = "";
-    if (!sendDataToSalesForce(target, formData, formElements)) {
+
+    if (!sendDataToSalesForce(target, formData, formElements, request, response)) {
       return new FormProcessingResult(false, SF_SAVE);
     }
 
@@ -104,9 +106,13 @@ public class ProspectServiceFormAction implements FormAction {
   // private methods
   //
   // -------------------------------------------------------------------------------------------------------------------
-  private boolean sendDataToSalesForce(FormEditor target, String formData, List<FormElement> formElements) {
+  private boolean sendDataToSalesForce(FormEditor target,
+                                       String formData,
+                                       List<FormElement> formElements,
+                                       HttpServletRequest request,
+                                       HttpServletResponse response) {
     try {
-        if (!prospectServiceAdapter.sendDataToSalesForce(target, formData, formElements)) {
+        if (!prospectServiceAdapter.sendDataToSalesForce(target, formData, formElements, request, response)) {
           throw new IllegalStateException("Data to Salesforce could not be sent!");
         }
     } catch (Exception e) {

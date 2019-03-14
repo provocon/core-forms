@@ -20,6 +20,8 @@ import com.tallence.formeditor.cae.elements.FormElement;
 import com.tallence.formeditor.contentbeans.FormEditor;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -48,5 +50,9 @@ public interface FormEditorProspectServiceAdapter {
    * @param elements all the form elements, containing the current form request value.
    * @return true, if the data was saved successfully. False otherwise
    */
-  boolean sendDataToSalesForce(FormEditor target, String formData, List<FormElement> elements);
+  boolean sendDataToSalesForce(FormEditor target,
+                               String formData,
+                               List<FormElement> elements,
+                               HttpServletRequest request,
+                               HttpServletResponse response);
 }
