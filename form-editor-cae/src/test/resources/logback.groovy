@@ -1,13 +1,6 @@
-/*
- *
- *  Conceived, developed, and written 2018 and later by
- *
- *    Provocon for Deutsche Telekom AG
- *
- *  and maintained afterwards. German law applicable.
- *
+/**
+ * Allow for some logging during tests
  */
-
 // Log configuration for test setup
 scan '3600 seconds'
 
