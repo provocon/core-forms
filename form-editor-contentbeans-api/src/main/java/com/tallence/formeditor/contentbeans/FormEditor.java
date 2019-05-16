@@ -19,7 +19,6 @@ package com.tallence.formeditor.contentbeans;
 import com.coremedia.blueprint.common.contentbeans.CMTeasable;
 import com.coremedia.cae.aspect.Aspect;
 import com.coremedia.cap.struct.Struct;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +39,11 @@ public interface FormEditor extends CMTeasable {
    * The key of the MailAction. It is placed here, since it it used by a studio rest validator.
    */
   String MAIL_ACTION = "mailAction";
+
+   /**
+   * The key of the ProspectServiceAction. It is placed here, since it it used by a studio rest validator.
+   */
+  String PROSPECTSERVICE_ACTION = "prospectServiceAction";
 
   /**
    * Returns the value of the document property {@link #MASTER}.
@@ -111,5 +115,5 @@ public interface FormEditor extends CMTeasable {
   String FORM_SPAM_PROTECTION = "spamProtectionEnabled";
 
   Boolean isSpamProtectionEnabled();
-  
+
 }

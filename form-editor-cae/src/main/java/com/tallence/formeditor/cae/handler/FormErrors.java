@@ -30,5 +30,7 @@ public interface FormErrors {
 
   String DB_SAVE = "db-save-unsuccessful";
 
+  String SF_SAVE = "salesforce-save-unsuccessful";
+
   String USER_MAIL = "user-mail-not-sent";
 }
