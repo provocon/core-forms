@@ -68,7 +68,7 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
    * @return the string key of the concrete parser, e.g. "CheckBoxes". If {@link AbstractFormElementParser#getParserKeys()}
    * is implemented in subClass, this method is not required.
    */
-  String getParserKey() {
+  public String getParserKey() {
     return null;
   }
 
