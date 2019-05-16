@@ -24,7 +24,16 @@ import com.tallence.formeditor.cae.actions.DefaultFormAction;
 import com.tallence.formeditor.cae.actions.FormAction;
 import com.tallence.formeditor.cae.elements.FileUpload;
 import com.tallence.formeditor.cae.elements.FormElement;
+import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
+import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
 import com.tallence.formeditor.contentbeans.FormEditor;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,17 +48,6 @@ import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
-import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
-
 /**
  * Handler for Form-Requests for {@link FormEditor}s.
  */
@@ -60,7 +58,7 @@ public class FormController {
 
   private static final Logger LOG = LoggerFactory.getLogger(FormController.class);
 
-  private static final String FORMS_ROOT_URL_SEGMENT = "/dynamic/forms";
+  private static final String FORMS_ROOT_URL_SEGMENT = "/d/forms";
 
   private static final String FORM_EDITOR_SUBMIT_VIEW = "formEditorSubmit";
   static final String FORM_EDITOR_SUBMIT_URL = FORMS_ROOT_URL_SEGMENT + "/" + FORM_EDITOR_SUBMIT_VIEW + "/{currentContext}/{target}";
@@ -105,7 +103,7 @@ public class FormController {
       List<String> validationResult = formElement.getValidationResult();
       if (!validationResult.isEmpty()) {
         //This should not happen, since a client side validation is expected.
-        LOG.warn("Validation failed for Form [{}]. Validation-Result: [{}]", target.getContentId(), validationResult);
+        LOG.warn("Validation failed for field {} in form {}: {}",formElement.getName(), target.getContentId(), validationResult);
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return new FormProcessingResult(false, SERVER_VALIDATION);
       }
