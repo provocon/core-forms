@@ -17,13 +17,12 @@
 package com.tallence.formeditor.cae.elements;
 
 import com.tallence.formeditor.cae.validator.Validator;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.MultiValueMap;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Abstract Element used by all {@link FormElement}s.
@@ -35,6 +34,7 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   private String id;
   private String name;
   private String hint;
+  private String tecName;
   private T value;
   private V validator;
   private final Class<T> type;
@@ -117,6 +117,16 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   @Override
   public void setHint(String hint) {
     this.hint = hint;
+  }
+
+  @Override
+  public String getTecName() {
+    return tecName;
+  }
+
+  @Override
+  public void setTecName(String tecName) {
+    this.tecName = tecName;
   }
 
   @Override

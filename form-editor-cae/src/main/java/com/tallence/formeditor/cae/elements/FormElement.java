@@ -16,11 +16,10 @@
 
 package com.tallence.formeditor.cae.elements;
 
-import org.springframework.util.MultiValueMap;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Interface for all FormElements.
@@ -45,6 +44,10 @@ public interface FormElement<T> {
   String getHint();
 
   void setHint(String hint);
+
+  String getTecName();
+
+  void setTecName(String name);
 
   T getValue();
 

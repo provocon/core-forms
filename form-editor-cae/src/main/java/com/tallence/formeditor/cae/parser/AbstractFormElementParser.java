@@ -19,7 +19,6 @@ package com.tallence.formeditor.cae.parser;
 import com.coremedia.cap.struct.Struct;
 import com.tallence.formeditor.cae.elements.ComplexValue;
 import com.tallence.formeditor.cae.elements.FormElement;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -36,14 +35,15 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractFormElementParser<T extends FormElement> {
 
-  static final String FORM_DATA_VALIDATOR = "validator";
+  protected static final String FORM_DATA_VALIDATOR = "validator";
   private static final String FORM_DATA_NAME = "name";
   private static final String FORM_DATA_HINT = "hint";
-  static final String FORM_VALIDATOR_MANDATORY = "mandatory";
-  static final String FORM_VALIDATOR_MINSIZE = "minSize";
-  static final String FORM_VALIDATOR_MAXSIZE = "maxSize";
-  static final String FORM_VALIDATOR_REGEXP = "regexpValidator";
-  static final String FORM_GROUP_ELEMENTS_PROPERTY_NAME = "groupElements";
+  private static final String FORM_DATA_TECNAME = "technicalName";
+  protected static final String FORM_VALIDATOR_MANDATORY = "mandatory";
+  protected static final String FORM_VALIDATOR_MINSIZE = "minSize";
+  protected static final String FORM_VALIDATOR_MAXSIZE = "maxSize";
+  protected static final String FORM_VALIDATOR_REGEXP = "regexpValidator";
+  protected static final String FORM_GROUP_ELEMENTS_PROPERTY_NAME = "groupElements";
 
   /**
    * Creates an instance of the concrete parser class.
@@ -95,32 +95,33 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
 
     formElement.setName(parseString(elementData, FORM_DATA_NAME));
     formElement.setHint(parseString(elementData, FORM_DATA_HINT));
+    formElement.setTecName(parseString(elementData, FORM_DATA_TECNAME));
     formElement.setId(id);
   }
 
-  void doForStructElement(Struct parent, String key, Consumer<Struct> callback) {
+  public void doForStructElement(Struct parent, String key, Consumer<Struct> callback) {
     if (parent.get(key) != null) {
       Struct struct = parent.getStruct(key);
       callback.accept(struct);
     }
   }
 
-  static List<ComplexValue> parseComplexValues(Struct values) {
+  protected static List<ComplexValue> parseComplexValues(Struct values) {
     return values.getProperties().entrySet().stream()
             .filter(e -> e.getValue() instanceof Struct)
             .map(e -> new ComplexValue(e.getKey(), (Struct) e.getValue()))
             .collect(Collectors.toList());
   }
 
-  static String parseString(Struct elementData, String key) {
+  protected static String parseString(Struct elementData, String key) {
     return elementData.get(key) != null ? elementData.getString(key) : null;
   }
 
-  static boolean parseBoolean(Struct elementData, String key) {
+  protected static boolean parseBoolean(Struct elementData, String key) {
     return elementData.get(key) != null && elementData.getBoolean(key);
   }
 
-  static Integer parseInteger(Struct elementData, String key) {
+  protected static Integer parseInteger(Struct elementData, String key) {
     return elementData.get(key) != null ? elementData.getInt(key) : null;
   }
 }
