@@ -70,6 +70,7 @@ public class AppliedFormElementsContainerBase extends Container {
     var formElementEditor:FormElement = ReusableComponentsServiceImpl.getInstance().requestComponentForReuse(formElement.getType()) as FormElement;
     if (formElement != formElementEditor.getFormElementStructWrapper()) {
       formElementEditor.updateFormElementStructWrapper(formElement);
+
       panel.add(formElementEditor as Component);
     }
 

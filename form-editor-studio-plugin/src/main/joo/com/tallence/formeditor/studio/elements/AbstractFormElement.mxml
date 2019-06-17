@@ -38,7 +38,8 @@
   <local:defaults>
     <fields:FormEditorField bindTo="{getBindTo()}"
                             forceReadOnlyValueExpression="{getForceReadOnlyVE()}"
-                            formElementStructVE="{getFormElementStructVE()}"/>
+                            formElementStructVE="{getFormElementStructVE()}"
+                            />
   </local:defaults>
 
 </local:AbstractFormElementBase>

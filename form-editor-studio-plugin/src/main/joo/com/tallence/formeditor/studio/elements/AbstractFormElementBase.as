@@ -27,6 +27,8 @@ public class AbstractFormElementBase extends Container implements FormElement {
 
   private static const FORM_ELEMENT_UPDATE_EVT:String = "formElementUpdated";
 
+  private var tecNameVE:ValueExpression;
+  private var tecName:String;
   private var group:String;
   private var elementType:String;
   private var iconCls:String;
@@ -50,6 +52,11 @@ public class AbstractFormElementBase extends Container implements FormElement {
     return elementType;
   }
 
+  public function getTecName():String {
+
+    return tecName;
+  }
+
   public function getFormElementIconCls():String {
     return iconCls;
   }
@@ -63,11 +70,32 @@ public class AbstractFormElementBase extends Container implements FormElement {
     formElementStructVE = wrapper.getFormElementVE();
     bindTo = wrapper.getBindTo();
     forceReadOnlyValueExpression = wrapper.getForceReadOnlyValueExpression();
+    tecNameVE = getTecNameVE();
     fireEvent(FORM_ELEMENT_UPDATE_EVT);
   }
 
   public function getFormElementStructWrapper():FormElementStructWrapper {
     return structWrapper;
+  }
+
+  /**
+   * Since the editors for form elements are reused, the component is created without a form element struct value
+   * expression. As soon as the method updateFormElementStructWrapper is called and the form element is updated, a new
+   * value expression is returned. This is necessary so that the binding to the correct struct works after the update.
+   */
+  public function getTecNameVE():ValueExpression {
+    if (!tecNameVE) {
+      tecNameVE = ValueExpressionFactory.createFromValue("DEFAULTVALUE");
+    }
+    if (structWrapper) {
+      tecNameVE = ValueExpressionFactory.createFromValue(structWrapper.getType() + "_" + structWrapper.getId());
+    }
+
+    var self:AbstractFormElementBase = this;
+    return ValueExpressionFactory.createFromFunction(function ():ValueExpressionValueHolder {
+      DependencyTracker.dependOnObservable(self, FORM_ELEMENT_UPDATE_EVT);
+      return new ValueExpressionValueHolder(tecNameVE);
+    });
   }
 
   /**
