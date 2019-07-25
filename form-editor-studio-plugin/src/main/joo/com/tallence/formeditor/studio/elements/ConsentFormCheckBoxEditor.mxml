@@ -14,6 +14,8 @@
     ]]></fx:Script>
 
   <local:items>
+        <fields:DefaultField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_technicalName_label')}"
+                         propertyName="technicalName"/>
         <fields:TextField
             fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_name_label')}"
             emptyText="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_name_emptyText')}"
