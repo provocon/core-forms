@@ -32,5 +32,7 @@ public interface FormErrors {
 
   String SF_SAVE = "salesforce-save-unsuccessful";
 
+  String WTC_SAVE = "webToCase-save-unsuccessful";
+
   String USER_MAIL = "user-mail-not-sent";
 }

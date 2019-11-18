@@ -46,6 +46,11 @@ public interface FormEditor extends CMTeasable {
   String PROSPECTSERVICE_ACTION = "prospectServiceAction";
 
   /**
+   * The key of the ProspectServiceAction. It is placed here, since it it used by a studio rest validator.
+   */
+  String WEBTOCASESERVICE_ACTION = "webToCaseServiceAction";
+
+  /**
    * Returns the value of the document property {@link #MASTER}.
    *
    * @return a {@link FormEditor} object
