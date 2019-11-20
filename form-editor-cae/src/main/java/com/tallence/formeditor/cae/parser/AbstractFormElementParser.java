@@ -35,15 +35,15 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractFormElementParser<T extends FormElement> {
 
-  protected static final String FORM_DATA_VALIDATOR = "validator";
-  private static final String FORM_DATA_NAME = "name";
-  private static final String FORM_DATA_HINT = "hint";
-  private static final String FORM_DATA_TECNAME = "technicalName";
+  public static final String FORM_DATA_VALIDATOR = "validator";
+  public static final String FORM_DATA_NAME = "name";
+  public static final String FORM_DATA_HINT = "hint";
+  public static final String FORM_DATA_TECNAME = "technicalName";
+  public static final String FORM_VALIDATOR_MINSIZE = "minSize";
+  public static final String FORM_VALIDATOR_MAXSIZE = "maxSize";
+  public static final String FORM_VALIDATOR_REGEXP = "regexpValidator";
+  public static final String FORM_GROUP_ELEMENTS_PROPERTY_NAME = "groupElements";
   protected static final String FORM_VALIDATOR_MANDATORY = "mandatory";
-  protected static final String FORM_VALIDATOR_MINSIZE = "minSize";
-  protected static final String FORM_VALIDATOR_MAXSIZE = "maxSize";
-  protected static final String FORM_VALIDATOR_REGEXP = "regexpValidator";
-  protected static final String FORM_GROUP_ELEMENTS_PROPERTY_NAME = "groupElements";
 
   /**
    * Creates an instance of the concrete parser class.
