@@ -53,10 +53,10 @@ public class MailFormAction extends AbstractFormAction {
   public FormProcessingResult handleFormSubmit(FormEditor target, List<MultipartFile> files, List<FormElement> formElements, HttpServletRequest request,
                                                               HttpServletResponse response) throws IOException {
 
-    if (!files.isEmpty()) {
-      throw new IllegalStateException("A MailAction is not responsible for forms with file upload fields. " +
-        "A studio validator should take care of this: com.tallence.formeditor.studio.validator.FormActionValidator");
-    }
+//    if (!files.isEmpty()) {
+//      throw new IllegalStateException("A MailAction is not responsible for forms with file upload fields. " +
+//        "A studio validator should take care of this: com.tallence.formeditor.studio.validator.FormActionValidator");
+//    }
 
     String formData = serializeFormElements(target, formElements, files);
     if (!sendAdminMail(target, formData, formElements)) {
