@@ -24,14 +24,18 @@ import com.tallence.formeditor.cae.actions.DefaultFormAction;
 import com.tallence.formeditor.cae.actions.FormAction;
 import com.tallence.formeditor.cae.elements.FileUpload;
 import com.tallence.formeditor.cae.elements.FormElement;
+import com.tallence.formeditor.cae.elements.TextField;
 import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
 import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
+import com.tallence.formeditor.cae.validator.TextValidator;
 import com.tallence.formeditor.contentbeans.FormEditor;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -97,6 +101,10 @@ public class FormController {
     List<FormElement> formElements = getFormElements(target);
 
     parseInputFormData(postData, request, formElements);
+    /* CloudTelekom Extension
+     * we need to handle the hidden fields of the form as well - not only studio-defined FormElements
+     */
+    parseHiddenFields(postData, formElements);
 
     //After all values are set: handle validationResult
     for (FormElement<?> formElement : formElements) {
@@ -156,6 +164,39 @@ public class FormController {
     return formElements;
   }
 
+
+  /**
+   * Cloud Telekom Extension:
+   * We need to handle hidden Fields as well as studio defined FormElements.
+   * We take all entries of formData and check if it is not a FormElement. If it is we ignore it here because
+   * it has been processed earlier on. For all other Elements we simply define a
+   * new {@link com.tallence.formeditor.cae.elements.TextField}, set the values accordingly and add these new
+   * elements to the list of formElements.
+   *
+   * @param formElements the List of FormElements declared in Studio - these are already processed.
+   * @param postData the MultiValueMap of all post data
+   */
+  private void parseHiddenFields(MultiValueMap<String, String> postData, List<FormElement> formElements) {
+    List<FormElement> newTextFields = new ArrayList<>();
+    Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
+        String entryKey = e1.getKey();
+
+        boolean exists = formElements
+                .parallelStream()
+                .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
+        LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
+        if (!exists) {
+          LOG.debug("{} NOT FOUND inside the list of FormElements - create a new TextField", entryKey);
+          TextField tf = new TextField();
+          tf.setName(entryKey);
+          tf.setTecName(entryKey);
+          tf.setValue(e1.getValue().get(0));
+          tf.setValidator(new TextValidator());
+          newTextFields.add(tf);
+        }
+    }));
+    formElements.addAll(newTextFields);
+  }
 
   private void parseInputFormData(MultiValueMap<String, String> postData, HttpServletRequest request,
                                   List<FormElement> formElements) {
