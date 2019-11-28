@@ -35,4 +35,6 @@ public interface FormErrors {
   String WTC_SAVE = "webToCase-save-unsuccessful";
 
   String USER_MAIL = "user-mail-not-sent";
+
+  String UPLOAD_MAIL = "upload-mail-not-sent";
 }

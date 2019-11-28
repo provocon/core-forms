@@ -40,7 +40,12 @@ public interface FormEditor extends CMTeasable {
    */
   String MAIL_ACTION = "mailAction";
 
-   /**
+  /**
+   * The key of the MailAction. It is placed here, since it it used by a studio rest validator.
+   */
+  String UPLOAD_MAIL_ACTION = "uploadMailAction";
+
+  /**
    * The key of the ProspectServiceAction. It is placed here, since it it used by a studio rest validator.
    */
   String PROSPECTSERVICE_ACTION = "prospectServiceAction";

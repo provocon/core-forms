@@ -16,6 +16,7 @@
 
 package com.tallence.formeditor.cae;
 
+import com.coremedia.blueprint.common.services.context.CurrentContextService;
 import com.coremedia.blueprint.testing.ContentTestHelper;
 import com.coremedia.cap.test.xmlrepo.XmlRepoConfiguration;
 import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.*;
@@ -43,6 +44,7 @@ import org.springframework.context.annotation.*;
         LINK_FORMATTER,
         "classpath:/com/tallence/formeditor/contentbeans/formeditor-contentbeans.xml",
         "classpath:/framework/spring/blueprint-handlers.xml",
+        "classpath:/framework/spring/blueprint-services.xml",
         "classpath:/framework/spring/blueprint-contentbeans.xml"
     },
     reader = ResourceAwareXmlBeanDefinitionReader.class
@@ -82,8 +84,8 @@ public class FormTestConfiguration {
 
   @Bean
   @Scope(SCOPE_SINGLETON)
-  public FormFreemarkerFacade freemarkerFacade(FormElementFactory formElementFactory, ReCaptchaService reCaptchaService) {
-    return new FormFreemarkerFacade(formElementFactory, reCaptchaService);
+  public FormFreemarkerFacade freemarkerFacade(FormElementFactory formElementFactory, ReCaptchaService reCaptchaService, CurrentContextService currentContextService) {
+    return new FormFreemarkerFacade(formElementFactory, reCaptchaService, currentContextService);
   }
 
 }

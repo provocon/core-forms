@@ -31,7 +31,7 @@ import static com.tallence.formeditor.cae.parser.AbstractFormElementParser.FORM_
  * Thus this validator is a commented component.
  *
  */
-// @Component
+@Component
 public class NoFileUploadOnMailActionValidator extends AbstractFormValidator implements FieldValidator {
 
   @Override
