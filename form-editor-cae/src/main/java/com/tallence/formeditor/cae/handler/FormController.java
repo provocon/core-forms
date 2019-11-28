@@ -139,6 +139,9 @@ public class FormController {
 
     List<MultipartFile> files = parseFileFormData(target, request, formElements);
 
+    for (FormElement element : formElements) {
+      LOG.info("socialFormAction() {}/{}: {}", element.getName(), element.getTecName(), element.getValue());
+    }
     //Default for an empty actionKey: the DefaultAction
     String actionKey = target.getFormAction();
     if (!StringUtils.hasText(actionKey)) {
@@ -147,9 +150,6 @@ public class FormController {
 
     Optional<FormAction> optional = formActions.stream().filter((action) -> action.isResponsible(actionKey)).findFirst();
     if (optional.isPresent()) {
-      for (FormElement element : formElements) {
-        LOG.info("socialFormAction() {}/{}: {}", element.getName(), element.getTecName(), element.getValue());
-      }
       return optional.get().handleFormSubmit(target, files, formElements, request, response);
     } else {
       LOG.error("Cannot find a formAction for configured key [{}] for Form [{}]", actionKey, target.getContentId());
@@ -191,7 +191,8 @@ public class FormController {
         LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
         if (!exists) {
           LOG.debug("{} NOT FOUND inside the list of FormElements - create a new TextField", entryKey);
-          LOG.info("{} NOT FOUND inside the list of FormElements: {}", entryKey, e1.getValue().get(0));
+          String fieldValue = e1.getValue().get(0);
+          LOG.info("{} NOT FOUND inside the list of FormElements: {} :{}", entryKey, fieldValue, fieldValue.getClass().getSimpleName());
           TextField tf = new TextField();
           tf.setName(entryKey);
           tf.setTecName(entryKey);
@@ -200,10 +201,9 @@ public class FormController {
           textValidator.setMinSize(0);
           textValidator.setMaxSize(250);
           tf.setValidator(textValidator);
-          // tf.setValue(e1.getValue().get(0));
-          tf.setValue(postData, request);
+          tf.setValue(fieldValue);
           newTextFields.add(tf);
-          LOG.info("New FormElements {}: '{}'", tf.getTecName(), tf.getValue());
+          LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
         }
     }));
     formElements.addAll(newTextFields);
