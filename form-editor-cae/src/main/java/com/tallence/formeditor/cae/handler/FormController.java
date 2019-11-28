@@ -104,10 +104,10 @@ public class FormController {
     /* CloudTelekom Extension
      * we need to handle the hidden fields of the form as well - not only studio-defined FormElements
      */
-    parseHiddenFields(postData, request, formElements);
+    List<FormElement> visibleAndHiddenElements = parseHiddenFields(postData, request, formElements);
 
     //After all values are set: handle validationResult
-    for (FormElement<?> formElement : formElements) {
+    for (FormElement<?> formElement : visibleAndHiddenElements) {
       List<String> validationResult = formElement.getValidationResult();
       if (!validationResult.isEmpty()) {
         //This should not happen, since a client side validation is expected.
@@ -139,6 +139,7 @@ public class FormController {
 
     List<MultipartFile> files = parseFileFormData(target, request, formElements);
 
+    formElements = visibleAndHiddenElements;
     for (FormElement element : formElements) {
       LOG.info("socialFormAction() {}/{}: {}", element.getName(), element.getTecName(), element.getValue());
     }
@@ -180,7 +181,7 @@ public class FormController {
    * @param request request context to resolve values
    * @param formElements the List of FormElements declared in Studio - these are already processed
    */
-  private void parseHiddenFields(MultiValueMap<String, String> postData, HttpServletRequest request, List<FormElement> formElements) {
+  private List<FormElement> parseHiddenFields(MultiValueMap<String, String> postData, HttpServletRequest request, List<FormElement> formElements) {
     List<FormElement> newTextFields = new ArrayList<>();
     Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
         String entryKey = e1.getKey();
@@ -206,7 +207,9 @@ public class FormController {
           LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
         }
     }));
-    formElements.addAll(newTextFields);
+    List<FormElement> result = new ArrayList<>(formElements);
+    result.addAll(newTextFields);
+    return result;
   }
 
   private void parseInputFormData(MultiValueMap<String, String> postData, HttpServletRequest request,
