@@ -187,6 +187,7 @@ public class FormController {
         LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
         if (!exists) {
           LOG.debug("{} NOT FOUND inside the list of FormElements - create a new TextField", entryKey);
+          LOG.info("{} NOT FOUND inside the list of FormElements: {}", entryKey, e1.getValue());
           TextField tf = new TextField();
           tf.setName(entryKey);
           tf.setTecName(entryKey);
