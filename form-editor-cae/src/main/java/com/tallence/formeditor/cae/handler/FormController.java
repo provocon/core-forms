@@ -104,7 +104,7 @@ public class FormController {
     /* CloudTelekom Extension
      * we need to handle the hidden fields of the form as well - not only studio-defined FormElements
      */
-    parseHiddenFields(postData, formElements);
+    parseHiddenFields(postData, request, formElements);
 
     //After all values are set: handle validationResult
     for (FormElement<?> formElement : formElements) {
@@ -147,6 +147,9 @@ public class FormController {
 
     Optional<FormAction> optional = formActions.stream().filter((action) -> action.isResponsible(actionKey)).findFirst();
     if (optional.isPresent()) {
+      for (FormElement element : formElements) {
+        LOG.info("socialFormAction() {}/{}: {}", element.getName(), element.getTecName(), element.getValue());
+      }
       return optional.get().handleFormSubmit(target, files, formElements, request, response);
     } else {
       LOG.error("Cannot find a formAction for configured key [{}] for Form [{}]", actionKey, target.getContentId());
@@ -173,10 +176,11 @@ public class FormController {
    * new {@link com.tallence.formeditor.cae.elements.TextField}, set the values accordingly and add these new
    * elements to the list of formElements.
    *
-   * @param formElements the List of FormElements declared in Studio - these are already processed.
    * @param postData the MultiValueMap of all post data
+   * @param request request context to resolve values
+   * @param formElements the List of FormElements declared in Studio - these are already processed
    */
-  private void parseHiddenFields(MultiValueMap<String, String> postData, List<FormElement> formElements) {
+  private void parseHiddenFields(MultiValueMap<String, String> postData, HttpServletRequest request, List<FormElement> formElements) {
     List<FormElement> newTextFields = new ArrayList<>();
     Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
         String entryKey = e1.getKey();
@@ -191,8 +195,13 @@ public class FormController {
           TextField tf = new TextField();
           tf.setName(entryKey);
           tf.setTecName(entryKey);
-          tf.setValue(e1.getValue().get(0));
-          tf.setValidator(new TextValidator());
+          TextValidator textValidator = new TextValidator();
+          textValidator.setMandatory(true);
+          textValidator.setMinSize(0);
+          textValidator.setMaxSize(250);
+          tf.setValidator(textValidator);
+          // tf.setValue(e1.getValue().get(0));
+          tf.setValue(postData, request);
           newTextFields.add(tf);
           LOG.info("New FormElements {}: '{}'", tf.getTecName(), tf.getValue());
         }
