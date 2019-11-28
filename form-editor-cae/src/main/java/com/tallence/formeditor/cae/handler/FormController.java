@@ -106,6 +106,9 @@ public class FormController {
      */
     List<FormElement> visibleAndHiddenElements = parseHiddenFields(postData, request, formElements);
 
+    /* CloudTelekom Extension
+     * validate also hidden fields
+     */
     //After all values are set: handle validationResult
     for (FormElement<?> formElement : visibleAndHiddenElements) {
       List<String> validationResult = formElement.getValidationResult();
@@ -137,12 +140,12 @@ public class FormController {
       parseInputFormData(escapedPostData, request, formElements);
     }
 
+    /* CloudTelekom Extension
+     * don't reparse hidden fields but use them now for the rest of the processing
+     */
+    formElements = visibleAndHiddenElements;
     List<MultipartFile> files = parseFileFormData(target, request, formElements);
 
-    formElements = visibleAndHiddenElements;
-    for (FormElement element : formElements) {
-      LOG.info("socialFormAction() {}/{}: {}", element.getName(), element.getTecName(), element.getValue());
-    }
     //Default for an empty actionKey: the DefaultAction
     String actionKey = target.getFormAction();
     if (!StringUtils.hasText(actionKey)) {
@@ -191,9 +194,8 @@ public class FormController {
                 .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
         LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
         if (!exists) {
-          LOG.debug("{} NOT FOUND inside the list of FormElements - create a new TextField", entryKey);
           String fieldValue = e1.getValue().get(0);
-          LOG.info("{} NOT FOUND inside the list of FormElements: {} :{}", entryKey, fieldValue, fieldValue.getClass().getSimpleName());
+          LOG.debug("Adding {} to list of FormElements with value '{}'", entryKey, fieldValue);
           TextField tf = new TextField();
           tf.setName(entryKey);
           tf.setTecName(entryKey);
@@ -204,7 +206,7 @@ public class FormController {
           tf.setValidator(textValidator);
           tf.setValue(fieldValue);
           newTextFields.add(tf);
-          LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
+          // LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
         }
     }));
     List<FormElement> result = new ArrayList<>(formElements);
