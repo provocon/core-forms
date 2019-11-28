@@ -187,13 +187,14 @@ public class FormController {
         LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
         if (!exists) {
           LOG.debug("{} NOT FOUND inside the list of FormElements - create a new TextField", entryKey);
-          LOG.info("{} NOT FOUND inside the list of FormElements: {}", entryKey, e1.getValue());
+          LOG.info("{} NOT FOUND inside the list of FormElements: {}", entryKey, e1.getValue().get(0));
           TextField tf = new TextField();
           tf.setName(entryKey);
           tf.setTecName(entryKey);
           tf.setValue(e1.getValue().get(0));
           tf.setValidator(new TextValidator());
           newTextFields.add(tf);
+          LOG.info("New FormElements {}: '{}'", tf.getTecName(), tf.getValue());
         }
     }));
     formElements.addAll(newTextFields);
