@@ -140,14 +140,19 @@
       <artifactId>cap-client-xml</artifactId>
       <scope>test</scope>
     </dependency>
-    <!--dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy</artifactId>
-      <scope>test</scope>
-    </dependency-->
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>image-transformation</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.coremedia.cms</groupId>
+      <artifactId>cap-transform</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
