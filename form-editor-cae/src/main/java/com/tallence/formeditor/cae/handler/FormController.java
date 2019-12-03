@@ -192,7 +192,10 @@ public class FormController {
         boolean exists = formElements
                 .parallelStream()
                 .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
-        LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
+        if ("g-recaptcha-response".equals(entryKey)) {
+            exists = true;
+            LOG.info("Ignore Re-Captcha parameters.");
+        }
         if (!exists) {
           String fieldValue = e1.getValue().get(0);
           LOG.debug("Adding {} to list of FormElements with value '{}'", entryKey, fieldValue);
@@ -207,6 +210,8 @@ public class FormController {
           tf.setValue(fieldValue);
           newTextFields.add(tf);
           // LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
+        } else {
+          LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
         }
     }));
     List<FormElement> result = new ArrayList<>(formElements);
