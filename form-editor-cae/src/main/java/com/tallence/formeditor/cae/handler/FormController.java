@@ -24,14 +24,18 @@ import com.tallence.formeditor.cae.actions.DefaultFormAction;
 import com.tallence.formeditor.cae.actions.FormAction;
 import com.tallence.formeditor.cae.elements.FileUpload;
 import com.tallence.formeditor.cae.elements.FormElement;
+import com.tallence.formeditor.cae.elements.TextField;
 import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
 import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
+import com.tallence.formeditor.cae.validator.TextValidator;
 import com.tallence.formeditor.contentbeans.FormEditor;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -97,9 +101,16 @@ public class FormController {
     List<FormElement> formElements = getFormElements(target);
 
     parseInputFormData(postData, request, formElements);
+    /* CloudTelekom Extension
+     * we need to handle the hidden fields of the form as well - not only studio-defined FormElements
+     */
+    List<FormElement> visibleAndHiddenElements = parseHiddenFields(postData, request, formElements);
 
+    /* CloudTelekom Extension
+     * validate also hidden fields
+     */
     //After all values are set: handle validationResult
-    for (FormElement<?> formElement : formElements) {
+    for (FormElement<?> formElement : visibleAndHiddenElements) {
       List<String> validationResult = formElement.getValidationResult();
       if (!validationResult.isEmpty()) {
         //This should not happen, since a client side validation is expected.
@@ -129,6 +140,10 @@ public class FormController {
       parseInputFormData(escapedPostData, request, formElements);
     }
 
+    /* CloudTelekom Extension
+     * don't reparse hidden fields but use them now for the rest of the processing
+     */
+    formElements = visibleAndHiddenElements;
     List<MultipartFile> files = parseFileFormData(target, request, formElements);
 
     //Default for an empty actionKey: the DefaultAction
@@ -156,6 +171,53 @@ public class FormController {
     return formElements;
   }
 
+
+  /**
+   * Cloud Telekom Extension:
+   * We need to handle hidden Fields as well as studio defined FormElements.
+   * We take all entries of formData and check if it is not a FormElement. If it is we ignore it here because
+   * it has been processed earlier on. For all other Elements we simply define a
+   * new {@link com.tallence.formeditor.cae.elements.TextField}, set the values accordingly and add these new
+   * elements to the list of formElements.
+   *
+   * @param postData the MultiValueMap of all post data
+   * @param request request context to resolve values
+   * @param formElements the List of FormElements declared in Studio - these are already processed
+   */
+  private List<FormElement> parseHiddenFields(MultiValueMap<String, String> postData, HttpServletRequest request, List<FormElement> formElements) {
+    List<FormElement> newTextFields = new ArrayList<>();
+    Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
+        String entryKey = e1.getKey();
+
+        boolean exists = formElements
+                .parallelStream()
+                .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
+        if ("g-recaptcha-response".equals(entryKey)) {
+            exists = true;
+            LOG.info("Ignore Re-Captcha parameters.");
+        }
+        if (!exists) {
+          String fieldValue = e1.getValue().get(0);
+          LOG.debug("Adding {} to list of FormElements with value '{}'", entryKey, fieldValue);
+          TextField tf = new TextField();
+          tf.setName(entryKey);
+          tf.setTecName(entryKey);
+          TextValidator textValidator = new TextValidator();
+          textValidator.setMandatory(true);
+          textValidator.setMinSize(0);
+          textValidator.setMaxSize(250);
+          tf.setValidator(textValidator);
+          tf.setValue(fieldValue);
+          newTextFields.add(tf);
+          // LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
+        } else {
+          LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
+        }
+    }));
+    List<FormElement> result = new ArrayList<>(formElements);
+    result.addAll(newTextFields);
+    return result;
+  }
 
   private void parseInputFormData(MultiValueMap<String, String> postData, HttpServletRequest request,
                                   List<FormElement> formElements) {
