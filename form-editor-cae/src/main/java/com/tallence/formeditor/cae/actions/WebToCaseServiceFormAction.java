@@ -24,7 +24,7 @@ import static com.tallence.formeditor.contentbeans.FormEditor.WEBTOCASESERVICE_A
  * Sends the form data via Web2CaseService.
  *
  */
-//@Component
+@Component
 public class WebToCaseServiceFormAction implements FormAction {
 
     private static final Logger LOG = LoggerFactory.getLogger(WebToCaseServiceFormAction.class);
