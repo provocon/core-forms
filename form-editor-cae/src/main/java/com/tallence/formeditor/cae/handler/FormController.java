@@ -189,16 +189,17 @@ public class FormController {
     Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
         String entryKey = e1.getKey();
 
-        boolean isPresentInFormElements = isPresentInFormElements(formElements, entryKey);
         if ("g-recaptcha-response".equals(entryKey)) {
-            isPresentInFormElements = true;
-            LOG.info("Ignore Re-Captcha parameters.");
+          LOG.info("Ignore Re-Captcha parameters.");
+          return; // only skips this iteration.
         }
-        if (!isPresentInFormElements) {
+
+        if (!isPresentInFormElements(formElements, entryKey)) {
           addEntryToForm(newTextFields, e1, entryKey);
-        } else {
-          LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
+          return; // only skips this iteration.
         }
+
+        LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
     }));
     List<FormElement> result = new ArrayList<>(formElements);
     result.addAll(newTextFields);
