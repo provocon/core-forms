@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -188,27 +189,13 @@ public class FormController {
     Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
         String entryKey = e1.getKey();
 
-        boolean exists = formElements
-                .parallelStream()
-                .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
+        boolean isPresentInFormElements = isPresentInFormElements(formElements, entryKey);
         if ("g-recaptcha-response".equals(entryKey)) {
-            exists = true;
+            isPresentInFormElements = true;
             LOG.info("Ignore Re-Captcha parameters.");
         }
-        if (!exists) {
-          String fieldValue = e1.getValue().get(0);
-          LOG.debug("Adding {} to list of FormElements with value '{}'", entryKey, fieldValue);
-          TextField tf = new TextField();
-          tf.setName(entryKey);
-          tf.setTecName(entryKey);
-          TextValidator textValidator = new TextValidator();
-          textValidator.setMandatory(true);
-          textValidator.setMinSize(0);
-          textValidator.setMaxSize(250);
-          tf.setValidator(textValidator);
-          tf.setValue(fieldValue);
-          newTextFields.add(tf);
-          // LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
+        if (!isPresentInFormElements) {
+          addEntryToForm(newTextFields, e1, entryKey);
         } else {
           LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
         }
@@ -216,6 +203,28 @@ public class FormController {
     List<FormElement> result = new ArrayList<>(formElements);
     result.addAll(newTextFields);
     return result;
+  }
+
+  private void addEntryToForm(List<FormElement> newTextFields, Map.Entry<String, List<String>> e1, String entryKey) {
+    String fieldValue = e1.getValue().get(0);
+    LOG.debug("Adding {} to list of FormElements with value '{}'", entryKey, fieldValue);
+    TextField tf = new TextField();
+    tf.setName(entryKey);
+    tf.setTecName(entryKey);
+    TextValidator textValidator = new TextValidator();
+    textValidator.setMandatory(true);
+    textValidator.setMinSize(0);
+    textValidator.setMaxSize(250);
+    tf.setValidator(textValidator);
+    tf.setValue(fieldValue);
+    newTextFields.add(tf);
+    // LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
+  }
+
+  private boolean isPresentInFormElements(List<FormElement> formElements, String entryKey) {
+    return formElements
+            .parallelStream()
+            .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
   }
 
   private void parseInputFormData(MultiValueMap<String, String> postData, HttpServletRequest request,
