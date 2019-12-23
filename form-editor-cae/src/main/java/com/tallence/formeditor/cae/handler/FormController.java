@@ -105,7 +105,7 @@ public class FormController {
     /* CloudTelekom Extension
      * we need to handle the hidden fields of the form as well - not only studio-defined FormElements
      */
-    List<FormElement> visibleAndHiddenElements = parseHiddenFields(postData, formElements);
+    List<FormElement> visibleAndHiddenElements = addAdditionalParametersAsTextField(postData, formElements);
 
     /* CloudTelekom Extension
      * validate also hidden fields
@@ -184,7 +184,7 @@ public class FormController {
    * @param postData the MultiValueMap of all post data
    * @param formElements the List of FormElements declared in Studio - these are already processed
    */
-  private List<FormElement> parseHiddenFields(MultiValueMap<String, String> postData, List<FormElement> formElements) {
+  private List<FormElement> addAdditionalParametersAsTextField(MultiValueMap<String, String> postData, List<FormElement> formElements) {
     List<FormElement> newTextFields = new ArrayList<>();
     Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
         String entryKey = e1.getKey();
@@ -201,6 +201,10 @@ public class FormController {
 
         LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
     }));
+    return addLists(formElements, newTextFields);
+  }
+
+  private List<FormElement> addLists(List<FormElement> formElements, List<FormElement> newTextFields) {
     List<FormElement> result = new ArrayList<>(formElements);
     result.addAll(newTextFields);
     return result;
