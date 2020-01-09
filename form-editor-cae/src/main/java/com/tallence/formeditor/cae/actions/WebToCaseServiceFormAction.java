@@ -3,6 +3,7 @@ package com.tallence.formeditor.cae.actions;
 import com.tallence.formeditor.cae.elements.FormElement;
 import com.tallence.formeditor.cae.handler.FormController.FormProcessingResult;
 import com.tallence.formeditor.contentbeans.FormEditor;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,19 +57,15 @@ public class WebToCaseServiceFormAction implements FormAction {
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        String formData = "";
-
         if (!sendDataToWebToCase(target, files, formElements, request, response)) {
             return new FormProcessingResult(false, WTC_SAVE);
         }
 
-        // should an admin information email be send ?
-        if (!sendAdminMail(target, formData, formElements)) {
+        // send admin emails
+        if (!sendAdminMail(target, formElements)) {
             return new FormProcessingResult(false, ADMIN_MAIL);
         }
 
-        // should an user confirmation email be send ?
-        // boolean errorSendingUserMail = sendUserConfirmationMail(target, formElements, formData, request, response, files);
         return new FormProcessingResult(true, null);
     }
 
@@ -101,24 +98,12 @@ public class WebToCaseServiceFormAction implements FormAction {
         return result;
     }
 
-
-    private boolean sendAdminMail(FormEditor target, String formData, List<FormElement> formElements) {
-        boolean result = false;
-        try {
-            int count = 0;
-            for (String address : target.getAdminEmails()) {
-                if (webToCaseServiceAdapter.sendAdminMail(target, address, formData, formElements)) {
-                    count++;
-                } else {
-                    LOG.error("sendAdminMail() mail to "+address+" could not be sent.");
-                }
-                result = count==target.getAdminEmails().size();
-            }
-        } catch (Exception e) {
-            LOG.error("sendAdminMail() Confirmation mail to admin(s) "+target.getAdminEmails()+" could not be sent for form "+target.getContentId(), e);
-        }
-        LOG.info("sendAdminMail() form {}: {}", target.getContentId(), result);
-        return result;
+    /*
+     * Since the resolving of ALL the recipients is done inside CTBaseAdapters#sendMail it is only
+     * necessary to call sendAdminMail on the Adapter once !
+     */
+    private boolean sendAdminMail(FormEditor target, List<FormElement> formElements) {
+        return webToCaseServiceAdapter.sendAdminMail(target, StringUtils.EMPTY, StringUtils.EMPTY, formElements);
     }
 
 }

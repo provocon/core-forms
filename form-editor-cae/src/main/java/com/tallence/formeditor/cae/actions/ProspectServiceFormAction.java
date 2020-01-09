@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,20 +61,16 @@ public class ProspectServiceFormAction implements FormAction {
                     +"A studio validator should take care of this - FormActionValidator");
         }
 
-        //String formData = serializeFormElements(target, formElements, files);
-        String formData = "";
-
-        if (!sendDataToSalesForce(target, formData, formElements, request, response)) {
+        // send data to salesforce
+        if (!sendDataToSalesForce(target, formElements, request, response)) {
             return new FormProcessingResult(false, SF_SAVE);
         }
 
-        // should an admin information email be send ?
-        if (!sendAdminMail(target, formData, formElements)) {
+        // send email(s) to studio configured recipients
+        if (!sendAdminMail(target, formElements)) {
             return new FormProcessingResult(false, ADMIN_MAIL);
         }
 
-        // should an user confirmation email be send ?
-        // boolean errorSendingUserMail = sendUserConfirmationMail(target, formElements, formData, request, response, files);
         return new FormProcessingResult(true, null);
     }
 
@@ -89,13 +87,12 @@ public class ProspectServiceFormAction implements FormAction {
     // -------------------------------------------------------------------------------------------------------------------
 
     private boolean sendDataToSalesForce(FormEditor target,
-            String formData,
-            List<FormElement> formElements,
-            HttpServletRequest request,
-            HttpServletResponse response) {
+                                         List<FormElement> formElements,
+                                         HttpServletRequest request,
+                                         HttpServletResponse response) {
         boolean result = false;
         try {
-            if (prospectServiceAdapter.sendDataToSalesForce(target, formData, formElements, request, response)) {
+            if (prospectServiceAdapter.sendDataToSalesForce(target, StringUtils.EMPTY, formElements, request, response)) {
                 result = true;
             }
         } catch (Exception e) {
@@ -105,24 +102,12 @@ public class ProspectServiceFormAction implements FormAction {
         return result;
     }
 
-
-    private boolean sendAdminMail(FormEditor target, String formData, List<FormElement> formElements) {
-        boolean result = false;
-        try {
-            int count = 0;
-            for (String address : target.getAdminEmails()) {
-                if (prospectServiceAdapter.sendAdminMail(target, address, formData, formElements)) {
-                    count++;
-                } else {
-                    LOG.error("sendAdminMail() mail to "+address+" could not be sent.");
-                }
-                result = count==target.getAdminEmails().size();
-            }
-        } catch (Exception e) {
-            LOG.error("sendAdminMail() Confirmation mail to admin(s) "+target.getAdminEmails()+" could not be sent for form "+target.getContentId(), e);
-        }
-        LOG.info("sendAdminMail() form {}: {}", target.getContentId(), result);
-        return result;
+    /*
+     * Since the resolving of ALL the recipients is done inside CTBaseAdapters#sendMail it is only
+     * necessary to call sendAdminMail on the Adapter once !
+     */
+    private boolean sendAdminMail(FormEditor target, List<FormElement> formElements) {
+        return prospectServiceAdapter.sendAdminMail(target, StringUtils.EMPTY, StringUtils.EMPTY, formElements);
     }
 
 }
