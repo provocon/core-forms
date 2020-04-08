@@ -58,14 +58,12 @@ public class WebToCaseServiceFormAction implements FormAction {
             HttpServletResponse response) throws IOException {
 
         if (!sendDataToWebToCase(target, files, formElements, request, response)) {
+            // send admin emails
+            if (!sendAdminMail(target, formElements)) {
+                return new FormProcessingResult(false, ADMIN_MAIL);
+            }
             return new FormProcessingResult(false, WTC_SAVE);
         }
-
-        // send admin emails
-        if (!sendAdminMail(target, formElements)) {
-            return new FormProcessingResult(false, ADMIN_MAIL);
-        }
-
         return new FormProcessingResult(true, null);
     }
 
