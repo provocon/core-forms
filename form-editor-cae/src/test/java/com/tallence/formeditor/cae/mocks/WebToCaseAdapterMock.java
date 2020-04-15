@@ -18,11 +18,15 @@ import java.util.List;
 @Component
 public class WebToCaseAdapterMock implements FormEditorWebToCaseServiceAdapter {
 
-    @Override
-    public boolean sendAdminMail(FormEditor target, String recipient, String formData, List<FormElement> elements) {
-        return true;
-    }
 
+  @Override
+  public boolean sendAdminMail(FormEditor target,
+                               String recipient,
+                               String formData,
+                               List<FormElement> elements,
+                               boolean sfResult) {
+    return true;
+  }
 
   @Override
   public boolean sendDataToWebToCase(FormEditor target,
