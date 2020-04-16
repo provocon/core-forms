@@ -104,7 +104,7 @@ public class ProspectServiceFormAction implements FormAction {
 
     /*
      * Since the resolving of ALL the recipients is done inside CTBaseAdapters#sendMail it is only
-     * necessary to call sendAdminMail on the Adapter once !
+     * necessary to call sendAdminMail on the Adapter once.
      */
     private boolean sendAdminMail(FormEditor target, List<FormElement> formElements) {
         return prospectServiceAdapter.sendAdminMail(target, StringUtils.EMPTY, StringUtils.EMPTY, formElements);

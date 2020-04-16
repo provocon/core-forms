@@ -21,8 +21,8 @@ import static com.tallence.formeditor.contentbeans.FormEditor.WEBTOCASESERVICE_A
 
 
 /**
- * web2case Service Action for the form framework.
- * Sends the form data via Web2CaseService.
+ * WebToCase Service Action for the form framework.
+ * Sends the form data via a WebToCase endpoint to a SalesForce instance.
  *
  */
 @Component
@@ -59,7 +59,7 @@ public class WebToCaseServiceFormAction implements FormAction {
 
         FormProcessingResult processingResult = new FormProcessingResult(true, null);
 
-        // send data to web2case
+        // send data to webtocase
         boolean sfResult = sendDataToWebToCase(target, files, formElements, request, response);
         if (!sfResult) {
             processingResult = new FormProcessingResult(false, WTC_SAVE);
