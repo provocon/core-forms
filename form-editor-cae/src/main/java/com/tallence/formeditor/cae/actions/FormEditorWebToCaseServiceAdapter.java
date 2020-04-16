@@ -22,11 +22,11 @@ public interface FormEditorWebToCaseServiceAdapter {
    * @param recipient address which will receive the mail.
    * @param formData formData already serialized to one plain string
    * @param elements all the form elements, containing the current form request value.
-   * @param salesForceResult boolean flag that indicates, if the call to the SalesForce WebToCase instance was successful.
+   * @param salesForceSuccess boolean flag that indicates, if the call to the SalesForce WebToCase instance was successful.
    *
    * @return {@code true}, if the data was send via email successfully. {@code false} otherwise
    */
-  boolean sendAdminMail(FormEditor target, String recipient, String formData, List<FormElement> elements, boolean salesForceResult);
+  boolean sendAdminMail(FormEditor target, String recipient, String formData, List<FormElement> elements, boolean salesForceSuccess);
 
   /**
    * Sends data to a SalesForce WebToCase backend.
