@@ -21,8 +21,8 @@ import static com.tallence.formeditor.contentbeans.FormEditor.WEBTOCASESERVICE_A
 
 
 /**
- * web2case Service Action for the form framework.
- * Sends the form data via Web2CaseService.
+ * WebToCase Service Action for the form framework.
+ * Sends the form data via a WebToCase endpoint to a SalesForce instance.
  *
  */
 @Component
@@ -57,16 +57,19 @@ public class WebToCaseServiceFormAction implements FormAction {
             HttpServletRequest request,
             HttpServletResponse response) throws IOException {
 
-        if (!sendDataToWebToCase(target, files, formElements, request, response)) {
-            return new FormProcessingResult(false, WTC_SAVE);
+        FormProcessingResult processingResult = new FormProcessingResult(true, null);
+
+        // send data to webtocase
+        boolean sfResult = sendDataToWebToCase(target, files, formElements, request, response);
+        if (!sfResult) {
+            processingResult = new FormProcessingResult(false, WTC_SAVE);
         }
 
         // send admin emails
-        if (!sendAdminMail(target, formElements)) {
-            return new FormProcessingResult(false, ADMIN_MAIL);
+        if (!sendAdminMail(target, formElements, sfResult)) {
+            processingResult = new FormProcessingResult(false, ADMIN_MAIL);
         }
-
-        return new FormProcessingResult(true, null);
+        return processingResult;
     }
 
 
@@ -102,8 +105,10 @@ public class WebToCaseServiceFormAction implements FormAction {
      * Since the resolving of ALL the recipients is done inside CTBaseAdapters#sendMail it is only
      * necessary to call sendAdminMail on the Adapter once !
      */
-    private boolean sendAdminMail(FormEditor target, List<FormElement> formElements) {
-        return webToCaseServiceAdapter.sendAdminMail(target, StringUtils.EMPTY, StringUtils.EMPTY, formElements);
+    private boolean sendAdminMail(FormEditor target,
+                                  List<FormElement> formElements,
+                                  boolean sfResult) {
+        return webToCaseServiceAdapter.sendAdminMail(target, StringUtils.EMPTY, StringUtils.EMPTY, formElements, sfResult);
     }
 
 }

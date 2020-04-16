@@ -9,12 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
- * Wraps the access to the web2case system. Used when sending data to web2case.
+ * Wraps the access to a SalesForce WebToCase system. Used when sending data to a given WebToCase endpoint.
  */
 public interface FormEditorWebToCaseServiceAdapter {
 
   /**
-   * Informs the form admin about a new form request.
+   * Notifies the form admin about a new form request.
    *
    * Field values of type {@link com.tallence.formeditor.cae.elements.FileUpload} can not yet be included in the mail.
    *
@@ -22,20 +22,26 @@ public interface FormEditorWebToCaseServiceAdapter {
    * @param recipient address which will receive the mail.
    * @param formData formData already serialized to one plain string
    * @param elements all the form elements, containing the current form request value.
-   * @return true, if the data was saved successfully. False otherwise
+   * @param salesForceSuccess boolean flag that indicates, if the call to the SalesForce WebToCase instance was successful.
+   *
+   * @return {@code true}, if the data was send via email successfully. {@code false} otherwise
    */
-  boolean sendAdminMail(FormEditor target, String recipient, String formData, List<FormElement> elements);
+  boolean sendAdminMail(FormEditor target, String recipient, String formData, List<FormElement> elements, boolean salesForceSuccess);
 
   /**
-   * Serialize the given data to the form editor storage.
+   * Sends data to a SalesForce WebToCase backend.
    *
-   * @param target the ContentBean of the current Form Document
-   * @param elements all the form elements, containing the current form request value.
-   * @return true, if the data was saved successfully. False otherwise
+   * @param target    the ContentBean of the current Form Document
+   * @param files     List with uploaded files
+   * @param elements  all the form elements, containing the current form request value.
+   * @param request   the current {@link HttpServletRequest}
+   * @param response  the current {@link HttpServletResponse}
+   *
+   * @return {@code true}, if the data was saved successfully. {@code false} otherwise
    */
   boolean sendDataToWebToCase(FormEditor target,
                               List<MultipartFile> files,
-                               List<FormElement> elements,
-                               HttpServletRequest request,
-                               HttpServletResponse response);
+                              List<FormElement> elements,
+                              HttpServletRequest request,
+                              HttpServletResponse response);
 }
