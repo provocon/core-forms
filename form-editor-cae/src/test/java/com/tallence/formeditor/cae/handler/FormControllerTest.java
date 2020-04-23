@@ -78,7 +78,8 @@ public class FormControllerTest {
           "TextArea: ist Text<br/>" +
           "TextOnly: Das ist ein langer Text zur Erklärung des Formulars<br/>" +
           "UsersMail: " + MAIL_ADDRESS_TEST + "<br/>" +
-          "Data protection consent form: true<br/>";
+          "Data protection consent form: true<br/>" +
+          "AdditionalParameter: affiliateCode<br/>";
 
   @Before
   public void setup() {
@@ -96,7 +97,7 @@ public class FormControllerTest {
 
   @Test
   public void testValidPost() throws Exception {
-
+    // see src/test/resources/com/tallence/formeditor/cae/testdata/2formElements.xml
     mvc.perform(fileUpload(TEST_URL)
         .param("TextField_TextField", "12345")
         .param("NumberField_NumberField", "18")
@@ -107,6 +108,7 @@ public class FormControllerTest {
         .param("ZipField_ZipFieldTest", "22945")
         .param("UsersMail_UsersMail", MAIL_ADDRESS_TEST)
         .param("ConsentFormCheckBox_ConsentFormCheckBox", "on")
+        .param("AdditionalParameter", "affiliateCode")
     )
         .andExpect(status().is2xxSuccessful())
         .andExpect(content().string("{\"success\":true,\"error\":null}"))
@@ -159,6 +161,7 @@ public class FormControllerTest {
         .param("ZipField_ZipFieldTest", "22945")
         .param("UsersMail_UsersMail", MAIL_ADDRESS_TEST)
         .param("ConsentFormCheckBox_ConsentFormCheckBox", "on")
+        .param("AdditionalParameter", "affiliateCode")
     )
         .andExpect(status().is2xxSuccessful())
         .andExpect(content().string("{\"success\":true,\"error\":null}"))
@@ -239,6 +242,7 @@ public class FormControllerTest {
         .param("ZipField_ZipFieldTest", "22945")
         .param("UsersMail_UsersMail", MAIL_ADDRESS_TEST)
         .param("ConsentFormCheckBox_ConsentFormCheckBox", "on")
+        .param("AdditionalParameter", "affiliateCode")
     )
         .andExpect(status().is2xxSuccessful())
         .andExpect(content().string("{\"success\":true,\"error\":null}"))

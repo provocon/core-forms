@@ -36,6 +36,7 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   private String id;
   private String name;
   private String hint;
+  private String tecName;
   private T value;
   private V validator;
   private AdvancedSettings settings;
@@ -136,6 +137,24 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   public void setHint(String hint) {
     this.hint = hint;
   }
+
+  /*
+   * START: Cloud Telekom Extension
+   * use custom technical name
+   */
+  @Override
+  public String getTecName() {
+    return tecName;
+  }
+
+  @Override
+  public void setTecName(String tecName) {
+    this.tecName = tecName;
+  }
+  /*
+   * END: Cloud Telekom Extension
+   * use custom technical name
+   */
 
   @Override
   public T getValue() {

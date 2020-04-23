@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Interface for all FormElements.
  */
@@ -51,6 +52,18 @@ public interface FormElement<T> {
   AdvancedSettings getAdvancedSettings();
 
   void setAdvancedSettings(AdvancedSettings settings);
+
+  /*
+   * START: Cloud Telekom Extension
+   * - use a custom technical name
+   */
+  String getTecName();
+
+  void setTecName(String name);
+  /*
+   * END: Cloud Telekom Extension
+   * - use a custom technical name
+   */
 
   @Nullable
   T getValue();

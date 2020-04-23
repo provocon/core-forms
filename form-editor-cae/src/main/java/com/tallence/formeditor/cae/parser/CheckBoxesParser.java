@@ -21,8 +21,8 @@ import com.tallence.formeditor.cae.elements.CheckBoxesGroup;
 import com.tallence.formeditor.cae.validator.CheckBoxesGroupValidator;
 import org.springframework.stereotype.Component;
 
-import static com.coremedia.blueprint.base.util.StructUtil.getBoolean;
-import static com.coremedia.blueprint.base.util.StructUtil.getSubstruct;
+import static com.coremedia.cap.util.StructUtil.getBoolean;
+import static com.coremedia.cap.util.StructUtil.getSubstruct;
 import static java.util.Optional.ofNullable;
 
 /**

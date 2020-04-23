@@ -19,18 +19,16 @@ package com.tallence.formeditor.cae;
 import com.coremedia.blueprint.common.services.context.CurrentContextService;
 import com.coremedia.blueprint.testing.ContentTestHelper;
 import com.coremedia.cap.test.xmlrepo.XmlRepoConfiguration;
+import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.*;
 import com.coremedia.cap.test.xmlrepo.XmlUapiConfig;
 import com.coremedia.springframework.xml.ResourceAwareXmlBeanDefinitionReader;
 import com.tallence.formeditor.cae.elements.FormElement;
 import com.tallence.formeditor.cae.handler.ReCaptchaService;
 import com.tallence.formeditor.cae.handler.ReCaptchaServiceImpl;
 import com.tallence.formeditor.cae.parser.AbstractFormElementParser;
-import org.springframework.context.annotation.*;
-
 import java.util.List;
-
-import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.*;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
+import org.springframework.context.annotation.*;
 
 /**
  * Configuration class to set up form test infrastructure.

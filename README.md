@@ -74,3 +74,6 @@ Be aware of the 2 Void-Adapters, they were created to let you have a frustration
 * The [FormEditorStorageAdapter](https://github.com/tallence/core-forms/blob/master/form-editor-cae/src/main/java/com/tallence/formeditor/cae/actions/FormEditorStorageAdapter.java) is used to store the form data in a storage of your choice, e.g. the elastic social mongoDB or a custom DB or CRM. 
 
 That's it. Have fun ;) If you have any problems, questions, ideas, critics please contact us or create an issue. 
+
+# Migration steps
+* `git pull git@github.com:tallence/core-forms.git`

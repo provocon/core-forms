@@ -24,6 +24,7 @@ import com.tallence.formeditor.contentbeans.FormEditor;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 
 /**
  * FreemarkerFacade for Form elements.

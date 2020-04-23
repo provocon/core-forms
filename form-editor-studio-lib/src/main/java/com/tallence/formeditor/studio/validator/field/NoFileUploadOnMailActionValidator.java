@@ -26,6 +26,10 @@ import static com.tallence.formeditor.cae.parser.AbstractFormElementParser.FORM_
 
 /**
  * Validates, that forms where the mail action is selected have no file upload field.
+ *
+ * We need and want file uploads during mail action.
+ * Thus this validator is a commented component.
+ *
  */
 @Component
 public class NoFileUploadOnMailActionValidator extends AbstractFormValidator implements FieldValidator {

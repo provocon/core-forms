@@ -81,7 +81,8 @@ public class FormEditorValidatorTest {
     assertEquals(issues.getByProperty().get("formData.formElements.TextField.validator.regexpValidator").iterator().next(), issue3);
   }
 
-  @Test
+  // we want to have uploads in our mail action
+  // @Test
   public void testInvaildMailAction() {
     Content testContent = contentRepository.getContent("6");
     IssuesImpl<Content> issues = new IssuesImpl<>(testContent, testContent.getProperties().keySet());
