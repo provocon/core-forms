@@ -156,16 +156,6 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
    */
 
   @Override
-  public String getTecName() {
-    return tecName;
-  }
-
-  @Override
-  public void setTecName(String tecName) {
-    this.tecName = tecName;
-  }
-
-  @Override
   public T getValue() {
     return this.value;
   }
