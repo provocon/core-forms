@@ -105,9 +105,21 @@ public class FormElementFactoryTest {
     assertThat(formElement.getValidationResult().size(), is(1));
 
 
-    assertThat(formElement.getRadioButtons(), notNullValue());
-    assertThat(formElement.getRadioButtons().get(1).isSelectedByDefault(), is(true));
+    assertThat(formElement.getOptions(), notNullValue());
+    assertThat(formElement.getOptions().get(1).isSelectedByDefault(), is(true));
 
+  }
+
+  @Test
+  public void testDependentFields() {
+    TextField formElement = getTestFormElement("DependentField");
+
+    assertEquals("myComplexCustomId", formElement.getAdvancedSettings().getCustomId());
+    assertEquals(Integer.valueOf(3), formElement.getAdvancedSettings().getColumnWidth());
+    assertEquals(true, formElement.getAdvancedSettings().isBreakAfterElement());
+    assertEquals("RadioButtonsOptional", formElement.getAdvancedSettings().getDependentElementId());
+    assertEquals("123", formElement.getAdvancedSettings().getDependentElementValue());
+    assertEquals(true, formElement.getAdvancedSettings().isVisibilityDependent());
   }
 
   @Test
@@ -139,8 +151,8 @@ public class FormElementFactoryTest {
     formElement.setValue(Collections.emptyList());
     assertThat(formElement.getValidationResult().size(), is(1));
 
-    assertThat(formElement.getCheckBoxes(), notNullValue());
-    assertThat(formElement.getCheckBoxes().get(1).isSelectedByDefault(), is(true));
+    assertThat(formElement.getOptions(), notNullValue());
+    assertThat(formElement.getOptions().get(1).isSelectedByDefault(), is(true));
 
   }
 

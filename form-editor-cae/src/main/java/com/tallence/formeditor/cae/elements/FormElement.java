@@ -16,10 +16,12 @@
 
 package com.tallence.formeditor.cae.elements;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.util.MultiValueMap;
+
 
 /**
  * Interface for all FormElements.
@@ -45,10 +47,24 @@ public interface FormElement<T> {
 
   void setHint(String hint);
 
+  @Nullable
+  AdvancedSettings getAdvancedSettings();
+
+  void setAdvancedSettings(AdvancedSettings settings);
+
+  /*
+   * START: Cloud Telekom Extension
+   * - use a custom technical name
+   */
   String getTecName();
 
   void setTecName(String name);
+  /*
+   * END: Cloud Telekom Extension
+   * - use a custom technical name
+   */
 
+  @Nullable
   T getValue();
 
   void setValue(T value);
@@ -56,10 +72,19 @@ public interface FormElement<T> {
   Class<T> getType();
 
   /**
+   * Make sure to check {@link #dependencyFulfilled} before calling this method. The field might dependent on another field which
+   * is empty or has a wrong value.
+   *
    * Validates the current FormElement's value.
    * @return the validation result
    */
   List<String> getValidationResult();
+
+  /**
+   * Checks, if the dependent field's value matches this field's visibility config.
+   * @see AdvancedSettings#getDependentElementId()
+   */
+  boolean dependencyFulfilled(List<FormElement> allElements);
 
   /**
    * Returns the form Element value serialized as String

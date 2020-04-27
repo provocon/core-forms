@@ -16,13 +16,17 @@
 
 package com.tallence.formeditor.cae.parser;
 
+import com.coremedia.cap.util.StructUtil;
 import com.coremedia.cap.struct.Struct;
+import com.tallence.formeditor.cae.elements.AdvancedSettings;
 import com.tallence.formeditor.cae.elements.ComplexValue;
 import com.tallence.formeditor.cae.elements.FormElement;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static com.coremedia.cap.util.StructUtil.*;
+import static java.util.Optional.ofNullable;
 
 /**
  * Abstract Parser which can parse struct values into {@link FormElement} model beans.
@@ -36,6 +40,14 @@ import java.util.stream.Collectors;
 public abstract class AbstractFormElementParser<T extends FormElement> {
 
   public static final String FORM_DATA_VALIDATOR = "validator";
+  public static final String FORM_DATA_ADVANCED_SETTINGS = "advancedSettings";
+  public static final String FORM_DATA_CUSTOM_ID = "customId";
+  public static final String FORM_DATA_CUSTOM_WIDTH = "columnWidth";
+  public static final String FORM_DATA_BREAK_AFTER_ELEMENT = "breakAfterElement";
+  public static final String FORM_DATA_VISIBILIY = "visibility";
+  public static final String FORM_DATA_VISIBILITY_ACTIVATED = "activated";
+  public static final String FORM_DATA_VISIBILITY_ELEMENT_ID = "elementId";
+  public static final String FORM_DATA_VISIBILITY_ELEMENT_VALUE = "value";
   public static final String FORM_DATA_NAME = "name";
   public static final String FORM_DATA_HINT = "hint";
   public static final String FORM_DATA_TECNAME = "technicalName";
@@ -43,7 +55,7 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
   public static final String FORM_VALIDATOR_MAXSIZE = "maxSize";
   public static final String FORM_VALIDATOR_REGEXP = "regexpValidator";
   public static final String FORM_GROUP_ELEMENTS_PROPERTY_NAME = "groupElements";
-  protected static final String FORM_VALIDATOR_MANDATORY = "mandatory";
+  public static final String FORM_VALIDATOR_MANDATORY = "mandatory";
 
   /**
    * Creates an instance of the concrete parser class.
@@ -68,7 +80,7 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
    * @return the string key of the concrete parser, e.g. "CheckBoxes". If {@link AbstractFormElementParser#getParserKeys()}
    * is implemented in subClass, this method is not required.
    */
-  public String getParserKey() {
+  protected String getParserKey() {
     return null;
   }
 
@@ -86,6 +98,7 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
 
   /**
    * Parses the form element's name, id and hint, these two fields are used by every form element.
+   * And parse the advancedSettings which might be configured in most field types.
    *
    * @param formElement the current form element which is not filled completely yet.
    * @param elementData the struct representation of the current form field.
@@ -93,17 +106,29 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
    */
   public void parseBaseFields(final T formElement, Struct elementData, String id) {
 
-    formElement.setName(parseString(elementData, FORM_DATA_NAME));
-    formElement.setHint(parseString(elementData, FORM_DATA_HINT));
-    formElement.setTecName(parseString(elementData, FORM_DATA_TECNAME));
+    formElement.setName(getString(elementData, FORM_DATA_NAME));
+    formElement.setHint(getString(elementData, FORM_DATA_HINT));
+    formElement.setTecName(getString(elementData, FORM_DATA_TECNAME));
     formElement.setId(id);
-  }
 
-  public void doForStructElement(Struct parent, String key, Consumer<Struct> callback) {
-    if (parent.get(key) != null) {
-      Struct struct = parent.getStruct(key);
-      callback.accept(struct);
-    }
+    ofNullable(getSubstruct(elementData, FORM_DATA_ADVANCED_SETTINGS)).ifPresent(advancedSettings -> {
+
+      AdvancedSettings settings = new AdvancedSettings();
+
+      ofNullable(getString(advancedSettings, FORM_DATA_CUSTOM_ID)).ifPresent(settings::setCustomId);
+      ofNullable(getInteger(advancedSettings, FORM_DATA_CUSTOM_WIDTH)).ifPresent(settings::setColumnWidth);
+      settings.setBreakAfterElement(getBoolean(advancedSettings, FORM_DATA_BREAK_AFTER_ELEMENT));
+
+      ofNullable(getSubstruct(advancedSettings, FORM_DATA_VISIBILIY)).ifPresent(visibility -> {
+        boolean activated = getBoolean(visibility, FORM_DATA_VISIBILITY_ACTIVATED);
+        if (activated) {
+          settings.setVisibilityDependent(activated);
+          ofNullable(getString(visibility, FORM_DATA_VISIBILITY_ELEMENT_ID)).ifPresent(settings::setDependentElementId);
+          ofNullable(getString(visibility, FORM_DATA_VISIBILITY_ELEMENT_VALUE)).ifPresent(settings::setDependentElementValue);
+        }
+      });
+      formElement.setAdvancedSettings(settings);
+    });
   }
 
   protected static List<ComplexValue> parseComplexValues(Struct values) {
@@ -113,15 +138,4 @@ public abstract class AbstractFormElementParser<T extends FormElement> {
             .collect(Collectors.toList());
   }
 
-  protected static String parseString(Struct elementData, String key) {
-    return elementData.get(key) != null ? elementData.getString(key) : null;
-  }
-
-  protected static boolean parseBoolean(Struct elementData, String key) {
-    return elementData.get(key) != null && elementData.getBoolean(key);
-  }
-
-  protected static Integer parseInteger(Struct elementData, String key) {
-    return elementData.get(key) != null ? elementData.getInt(key) : null;
-  }
 }

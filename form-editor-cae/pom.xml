@@ -53,6 +53,10 @@
       <groupId>com.coremedia.cms</groupId>
       <artifactId>cae-contentbeanservices-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.coremedia.cms</groupId>
+      <artifactId>cap-unified-api-util</artifactId>
+    </dependency>
 
     <!-- Spring -->
     <dependency>
@@ -100,6 +104,11 @@
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Tests -->
