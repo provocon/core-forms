@@ -21,6 +21,9 @@ import com.tallence.formeditor.cae.elements.FileUpload;
 import com.tallence.formeditor.cae.validator.FileUploadValidator;
 import org.springframework.stereotype.Component;
 
+import static com.coremedia.blueprint.base.util.StructUtil.*;
+import static java.util.Optional.ofNullable;
+
 /**
  * Parser for elements of type {@link FileUpload}
  */
@@ -38,18 +41,18 @@ public class FileUploadParser extends AbstractFormElementParser<FileUpload> {
 
   @Override
   public void parseSpecialFields(FileUpload formElement, Struct elementData) {
-    doForStructElement(elementData, FORM_DATA_VALIDATOR, validator -> {
+    ofNullable(getSubstruct(elementData, FORM_DATA_VALIDATOR)).ifPresent(validator -> {
       FileUploadValidator fileUploadValidator = new FileUploadValidator(formElement);
-      fileUploadValidator.setMandatory(parseBoolean(validator, FORM_VALIDATOR_MANDATORY));
+      fileUploadValidator.setMandatory(getBoolean(validator, FORM_VALIDATOR_MANDATORY));
 
-      Integer maxSize = parseInteger(validator, FORM_VALIDATOR_MAXSIZE);
-      fileUploadValidator.setMaxSize(maxSize != null ? maxSize : fileUploadValidator.getMaxSize());
+      ofNullable(getInteger(validator, FORM_VALIDATOR_MINSIZE)).ifPresent(fileUploadValidator::setMinSize);
+      ofNullable(getInteger(validator, FORM_VALIDATOR_MAXSIZE)).ifPresent(fileUploadValidator::setMaxSize);
       formElement.setValidator(fileUploadValidator);
     });
   }
 
   @Override
   public String getParserKey() {
-    return this.parserKey;
+    return parserKey;
   }
 }

@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +53,8 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Iterator;
 
 /**
  * Handler for Form-Requests for {@link FormEditor}s.
@@ -104,11 +108,25 @@ public class FormController {
     /* CloudTelekom Extension
      * we need to handle the hidden fields of the form as well - not only studio-defined FormElements
      */
-    List<FormElement> visibleAndHiddenElements = parseHiddenFields(postData, request, formElements);
-
+    List<FormElement> visibleAndHiddenElements = addAdditionalParametersAsTextField(postData, formElements);
     /* CloudTelekom Extension
      * validate also hidden fields
      */
+    /* CloudTelekom Extension
+     * don't re-parse hidden fields but use them now for the rest of the processing
+     */
+    formElements = visibleAndHiddenElements;
+
+    //parse the files here already, before the validator runs
+    List<MultipartFile> files = parseFileFormData(target, request, formElements);
+
+    //Remove elements with unfulfilled dependencies, e.g. dependencies on other elements.
+    for (Iterator<FormElement> iterator = formElements.iterator(); iterator.hasNext(); ) {
+      if (!iterator.next().dependencyFulfilled(formElements)) {
+        iterator.remove();
+      }
+    }
+
     //After all values are set: handle validationResult
     for (FormElement<?> formElement : visibleAndHiddenElements) {
       List<String> validationResult = formElement.getValidationResult();
@@ -138,13 +156,12 @@ public class FormController {
       postData.forEach((key, value) ->
           escapedPostData.put(key, value.stream().map(HtmlUtils::htmlEscape).collect(Collectors.toList())));
       parseInputFormData(escapedPostData, request, formElements);
+      // START CloudTelekom Extension
+      // because we have added hidden field handling we need to be sure they will added here (now escaped) as well
+      formElements = addAdditionalParametersAsTextField(escapedPostData, formElements);
+      // END CloudTelekom Extension
     }
 
-    /* CloudTelekom Extension
-     * don't reparse hidden fields but use them now for the rest of the processing
-     */
-    formElements = visibleAndHiddenElements;
-    List<MultipartFile> files = parseFileFormData(target, request, formElements);
 
     //Default for an empty actionKey: the DefaultAction
     String actionKey = target.getFormAction();
@@ -181,42 +198,80 @@ public class FormController {
    * elements to the list of formElements.
    *
    * @param postData the MultiValueMap of all post data
-   * @param request request context to resolve values
    * @param formElements the List of FormElements declared in Studio - these are already processed
    */
-  private List<FormElement> parseHiddenFields(MultiValueMap<String, String> postData, HttpServletRequest request, List<FormElement> formElements) {
+  private List<FormElement> addAdditionalParametersAsTextField(MultiValueMap<String, String> postData, List<FormElement> formElements) {
     List<FormElement> newTextFields = new ArrayList<>();
     Stream.of(postData.entrySet()).forEach(e -> e.parallelStream().forEach(e1 -> {
         String entryKey = e1.getKey();
 
-        boolean exists = formElements
-                .parallelStream()
-                .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
         if ("g-recaptcha-response".equals(entryKey)) {
-            exists = true;
-            LOG.info("Ignore Re-Captcha parameters.");
+          LOG.info("Ignore Re-Captcha parameters.");
+          return; // only skips this iteration.
         }
-        if (!exists) {
-          String fieldValue = e1.getValue().get(0);
-          LOG.debug("Adding {} to list of FormElements with value '{}'", entryKey, fieldValue);
-          TextField tf = new TextField();
-          tf.setName(entryKey);
-          tf.setTecName(entryKey);
-          TextValidator textValidator = new TextValidator();
-          textValidator.setMandatory(true);
-          textValidator.setMinSize(0);
-          textValidator.setMaxSize(250);
-          tf.setValidator(textValidator);
-          tf.setValue(fieldValue);
-          newTextFields.add(tf);
-          // LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
-        } else {
-          LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
+
+        if (!isPresentInFormElements(formElements, entryKey)) {
+          addEntryToForm(newTextFields, e1, entryKey);
+          return; // only skips this iteration.
         }
+
+        LOG.debug("Found {} inside the list of FormElements - ignore the entry", entryKey);
     }));
+    return addLists(formElements, newTextFields);
+  }
+
+
+  /**
+   * Cloud Telekom Extension:
+   */
+  private List<FormElement> addLists(List<FormElement> formElements, List<FormElement> newTextFields) {
     List<FormElement> result = new ArrayList<>(formElements);
-    result.addAll(newTextFields);
+
+    /*
+     * There is one edge case {this.encodeFormData == true} when the formValues will be
+     * re-parsed from the encoded request which leads to NULL values in our hidden-fields.
+     * So we need to check if the newly created TextField is already inside the list of formElements.
+     * If it already is inside we just set the value again, otherwise we add it to the given list of formElements.
+     */
+    newTextFields.forEach(newTextField -> {
+      Optional<FormElement> oldOne = formElements.stream()
+              .filter(formElement -> formElement.getTechnicalName().equals(newTextField.getTechnicalName()))
+              .findFirst();
+      if (oldOne.isPresent()) {
+        FormElement fe = oldOne.get();
+        fe.setValue(newTextField.getValue());
+      } else {
+        result.add(newTextField);
+      }
+    });
+
     return result;
+  }
+
+  /**
+   * Cloud Telekom Extension:
+   */
+  private void addEntryToForm(List<FormElement> newTextFields, Map.Entry<String, List<String>> e1, String entryKey) {
+    String fieldValue = e1.getValue().get(0);
+    LOG.debug("Adding {} to list of FormElements with value '{}'", entryKey, fieldValue);
+    TextField tf = new TextField();
+    tf.setName(entryKey);
+    tf.setTecName(entryKey);
+    tf.setId(entryKey);
+    TextValidator textValidator = new TextValidator();
+    textValidator.setMandatory(true);
+    textValidator.setMinSize(0);
+    textValidator.setMaxSize(250);
+    tf.setValidator(textValidator);
+    tf.setValue(fieldValue);
+    newTextFields.add(tf);
+    // LOG.info("New FormElement {}: '{}'", tf.getTecName(), tf.getValue());
+  }
+
+  private boolean isPresentInFormElements(List<FormElement> formElements, String entryKey) {
+    return formElements
+            .parallelStream()
+            .anyMatch(fe -> fe.getTechnicalName().equals(entryKey));
   }
 
   private void parseInputFormData(MultiValueMap<String, String> postData, HttpServletRequest request,
@@ -228,7 +283,10 @@ public class FormController {
 
   private List<MultipartFile> parseFileFormData(FormEditor target, HttpServletRequest request, List<FormElement> formElements) {
 
-    List<FormElement> fileFields = formElements.stream().filter(e -> e instanceof FileUpload).collect(Collectors.toList());
+    List<FileUpload> fileFields = formElements.stream()
+            .filter(FileUpload.class::isInstance)
+            .map(FileUpload.class::cast)
+            .collect(Collectors.toList());
     if (!fileFields.isEmpty()) {
       if (!(request instanceof MultipartHttpServletRequest)) {
         throw new IllegalStateException(
@@ -242,9 +300,9 @@ public class FormController {
     }
   }
 
-  private MultipartFile processFileInput(MultipartHttpServletRequest multipartRequest, FormElement e) {
-    MultipartFile file = multipartRequest.getFile(e.getTechnicalName());
-    ((FileUpload) e).setValue(file);
+  private MultipartFile processFileInput(MultipartHttpServletRequest multipartRequest, FileUpload fileUpload) {
+    MultipartFile file = multipartRequest.getFile(fileUpload.getTechnicalName());
+    fileUpload.setValue(file);
     return file;
   }
 
