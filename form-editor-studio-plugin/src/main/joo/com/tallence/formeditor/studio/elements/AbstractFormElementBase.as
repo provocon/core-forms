@@ -27,8 +27,10 @@ public class AbstractFormElementBase extends Container implements FormElement {
 
   private static const FORM_ELEMENT_UPDATE_EVT:String = "formElementUpdated";
 
+  // START Cloud Telekom Extension
   private var tecNameVE:ValueExpression;
   private var tecName:String;
+  // END Cloud Telekom Extension
   private var group:String;
   private var elementType:String;
   private var iconCls:String;
@@ -37,6 +39,7 @@ public class AbstractFormElementBase extends Container implements FormElement {
   private var bindTo:ValueExpression;
   private var forceReadOnlyValueExpression:ValueExpression;
   private var formIssuesVE:ValueExpression;
+  private var propertyPathVE:ValueExpression;
 
   public function AbstractFormElementBase(config:AbstractFormElement = null) {
     if (!config.formElementType) {
@@ -53,8 +56,8 @@ public class AbstractFormElementBase extends Container implements FormElement {
     return elementType;
   }
 
+  // Cloud Telekom Extension
   public function getTecName():String {
-
     return tecName;
   }
 
@@ -71,8 +74,10 @@ public class AbstractFormElementBase extends Container implements FormElement {
     formElementStructVE = wrapper.getFormElementVE();
     bindTo = wrapper.getBindTo();
     forceReadOnlyValueExpression = wrapper.getForceReadOnlyValueExpression();
+    propertyPathVE = ValueExpressionFactory.createFromValue(wrapper.getPropertyPath());
+    // START Cloud Telekom Extension
     tecNameVE = getTecNameVE();
-    formIssuesVE = wrapper.getFormIssuesVE();
+    // END Cloud Telekom Extension
     fireEvent(FORM_ELEMENT_UPDATE_EVT);
   }
 
@@ -81,6 +86,7 @@ public class AbstractFormElementBase extends Container implements FormElement {
   }
 
   /**
+   * Cloud Telekom Extension
    * Since the editors for form elements are reused, the component is created without a form element struct value
    * expression. As soon as the method updateFormElementStructWrapper is called and the form element is updated, a new
    * value expression is returned. This is necessary so that the binding to the correct struct works after the update.
@@ -157,12 +163,29 @@ public class AbstractFormElementBase extends Container implements FormElement {
    */
   public function getFormIssuesVE():ValueExpression {
     if (!formIssuesVE) {
-      formIssuesVE = ValueExpressionFactory.createFromValue([]);
+      formIssuesVE = getBindTo().extendBy(['issues', 'byProperty']);
     }
     var self:AbstractFormElementBase = this;
     return ValueExpressionFactory.createFromFunction(function ():ValueExpressionValueHolder {
       DependencyTracker.dependOnObservable(self, FORM_ELEMENT_UPDATE_EVT);
       return new ValueExpressionValueHolder(formIssuesVE);
+    });
+  }
+
+  /**
+   * Since the editors for form elements are reused, the component is created without a
+   * form issues value expression. As soon as the method updateFormElementStructWrapper is called and
+   * the form element is updated, a new value expression is returned. This is necessary so that the binding to the
+   * correct propertyPathVE works after the update.
+   */
+  public function getPropertyPathVE():ValueExpression {
+    if (!propertyPathVE) {
+      propertyPathVE = ValueExpressionFactory.createFromValue("");
+    }
+    var self:AbstractFormElementBase = this;
+    return ValueExpressionFactory.createFromFunction(function ():ValueExpressionValueHolder {
+      DependencyTracker.dependOnObservable(self, FORM_ELEMENT_UPDATE_EVT);
+      return new ValueExpressionValueHolder(propertyPathVE);
     });
   }
 }

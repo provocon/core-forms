@@ -20,6 +20,7 @@ import com.tallence.formeditor.cae.validator.Validator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.MultiValueMap;
@@ -37,6 +38,7 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   private String tecName;
   private T value;
   private V validator;
+  private AdvancedSettings settings;
   private final Class<T> type;
 
   public AbstractFormElement(Class<T> type) {
@@ -48,6 +50,19 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
     return this.validator != null ? this.validator.validate(getValue()) : Collections.emptyList();
   }
 
+  @Override
+  public boolean dependencyFulfilled(List<FormElement> allElements) {
+    if (settings != null && settings.isVisibilityDependent()) {
+      return allElements.stream().anyMatch(this::dependentFieldMatch);
+    }
+    return true;
+  }
+
+  protected boolean dependentFieldMatch(FormElement candidate) {
+    return candidate.getId().equals(settings.getDependentElementId())
+            && candidate.getValue() != null
+            && candidate.getValue().toString().equals(settings.getDependentElementValue());
+  }
 
   @Override
   public boolean isMandatory() {
@@ -91,7 +106,10 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
 
   @Override
   public String getId() {
-    return this.id;
+    return Optional.ofNullable(getAdvancedSettings())
+            .map(AdvancedSettings::getCustomId)
+            .filter(StringUtils::isNotBlank)
+            .orElse(this.id);
   }
 
   @Override
@@ -119,6 +137,10 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
     this.hint = hint;
   }
 
+  /*
+   * START: Cloud Telekom Extension
+   * use custom technical name
+   */
   @Override
   public String getTecName() {
     return tecName;
@@ -128,6 +150,10 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   public void setTecName(String tecName) {
     this.tecName = tecName;
   }
+  /*
+   * END: Cloud Telekom Extension
+   * use custom technical name
+   */
 
   @Override
   public T getValue() {
@@ -155,5 +181,15 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   @Override
   public String getTechnicalName() {
     return getClass().getSimpleName() + "_" + getId();
+  }
+
+  @Override
+  public AdvancedSettings getAdvancedSettings() {
+    return settings;
+  }
+
+  @Override
+  public void setAdvancedSettings(AdvancedSettings settings) {
+    this.settings = settings;
   }
 }
