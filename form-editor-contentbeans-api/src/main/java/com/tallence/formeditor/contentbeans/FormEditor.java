@@ -53,6 +53,11 @@ public interface FormEditor extends CMTeasable {
   /**
    * The key of the ProspectServiceAction. It is placed here, since it it used by a studio rest validator.
    */
+  String SIPTRUNK_ACTION = "sipTrunkAction";
+
+  /**
+   * The key of the ProspectServiceAction. It is placed here, since it it used by a studio rest validator.
+   */
   String WEBTOCASESERVICE_ACTION = "webToCaseServiceAction";
 
   /**
