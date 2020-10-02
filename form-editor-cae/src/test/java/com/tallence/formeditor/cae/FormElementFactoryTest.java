@@ -22,8 +22,10 @@ import com.tallence.formeditor.contentbeans.FormEditor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +40,7 @@ import static org.junit.Assert.*;
 /**
  * Tests the parsing, serialization and validation of each form field.
  */
+@WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = FormTestConfiguration.class)
 public class FormElementFactoryTest {
