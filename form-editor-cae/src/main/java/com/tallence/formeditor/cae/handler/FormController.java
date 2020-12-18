@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,6 +100,13 @@ public class FormController {
                                                @RequestParam MultiValueMap<String, String> postData,
                                                HttpServletRequest request,
                                                HttpServletResponse response) throws IOException {
+
+    if (target == null || currentContext == null) {
+      // Log the form data for debugging purpose, wrapped in a LinkedHashMap to make sure, the toString method is overwritten.
+      LOG.warn("No form or context document found, cannot handle the request. Form data: {}", new LinkedHashMap<>(postData));
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new FormProcessingResult(false, SERVER_VALIDATION);
+    }
 
     List<FormElement> formElements = getFormElements(target);
 
