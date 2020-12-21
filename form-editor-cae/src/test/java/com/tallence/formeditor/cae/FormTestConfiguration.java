@@ -20,12 +20,15 @@ import com.coremedia.blueprint.common.services.context.CurrentContextService;
 import com.coremedia.blueprint.testing.ContentTestHelper;
 import com.coremedia.cap.test.xmlrepo.XmlRepoConfiguration;
 import com.coremedia.cap.test.xmlrepo.XmlUapiConfig;
+import com.coremedia.cms.delivery.configuration.DeliveryConfigurationProperties;
+import com.coremedia.objectserver.configuration.CaeConfigurationProperties;
 import com.coremedia.springframework.xml.ResourceAwareXmlBeanDefinitionReader;
 import com.tallence.formeditor.cae.elements.FormElement;
 import com.tallence.formeditor.cae.handler.ReCaptchaService;
 import com.tallence.formeditor.cae.handler.ReCaptchaServiceImpl;
 import com.tallence.formeditor.cae.parser.AbstractFormElementParser;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +54,7 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
  * Configuration class to set up form test infrastructure.
  */
 @Configuration
+@EnableConfigurationProperties({CaeConfigurationProperties.class})
 @ImportResource(
     value = {
         CACHE,

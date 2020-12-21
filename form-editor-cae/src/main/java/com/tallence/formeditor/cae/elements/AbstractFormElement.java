@@ -17,13 +17,14 @@
 package com.tallence.formeditor.cae.elements;
 
 import com.tallence.formeditor.cae.validator.Validator;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.MultiValueMap;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Abstract Element used by all {@link FormElement}s.
@@ -35,6 +36,7 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
   private String id;
   private String name;
   private String hint;
+  private String placeholder;
   private String tecName;
   private T value;
   private V validator;
@@ -154,6 +156,16 @@ public abstract class AbstractFormElement<T, V extends Validator<T>> implements 
    * END: Cloud Telekom Extension
    * use custom technical name
    */
+
+  @Override
+  public String getPlaceholder() {
+    return this.placeholder;
+  }
+
+  @Override
+  public void setPlaceholder(String placeholder) {
+    this.placeholder = placeholder;
+  }
 
   @Override
   public T getValue() {

@@ -13,7 +13,6 @@
     public native function NumberFieldEditor(config:NumberFieldEditor = null);
     ]]></fx:Script>
 
-
   <local:items>
     <fields:DefaultField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_technicalName_label')}"
                          propertyName="technicalName"/>
@@ -23,15 +22,18 @@
     <fields:TextField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_hint_label')}"
                       emptyText="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_hint_emptyText')}"
                       propertyName="hint"/>
+    <fields:TextField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_placeholder_label')}"
+                      emptyText="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_placeholder_emptyText')}"
+                      propertyName="placeholder"/>
     <fields:CheckboxField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_element_mandatory_label')}"
                           propertyName="validator.mandatory"
                           defaultValue="false"/>
-    <fields:NumberField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_validator_maxValue_label')}"
-                        emptyText="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_validator_maxValue_text')}"
-                        propertyName="validator.maxSize"/>
     <fields:NumberField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_validator_minValue_label')}"
                         emptyText="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_validator_minValue_text')}"
                         propertyName="validator.minSize"/>
+    <fields:NumberField fieldLabel="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_validator_maxValue_label')}"
+                        emptyText="{resourceManager.getString('com.tallence.formeditor.studio.bundles.FormEditor', 'FormEditor_validator_maxValue_text')}"
+                        propertyName="validator.maxSize"/>
     <advancedsettings:AdvancedSettingsField propertyName="advancedSettings"/>
   </local:items>
 </local:AbstractFormElement>
