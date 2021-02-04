@@ -263,7 +263,8 @@ public class FormController {
     tf.setTecName(entryKey);
     tf.setId(entryKey);
     TextValidator textValidator = new TextValidator();
-    textValidator.setMandatory(true);
+    // refs #BMPCMS-7228 - uploaded Files maxSize check
+    textValidator.setMandatory(false);
     textValidator.setMinSize(0);
     textValidator.setMaxSize(250);
     tf.setValidator(textValidator);
