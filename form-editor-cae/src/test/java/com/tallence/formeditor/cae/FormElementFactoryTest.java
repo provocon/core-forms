@@ -27,6 +27,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -67,6 +70,8 @@ public class FormElementFactoryTest {
     TextField formElement = getTestFormElement("TextField");
 
     assertThat(formElement, is(instanceOf(TextField.class)));
+    assertThat(formElement.getPlaceholder(), is("Platzhalter"));
+
     //123 is too short and does not match the regex validator
     formElement.setValue("123");
     assertThat(formElement.getValidationResult().size(), is(2));
@@ -99,11 +104,11 @@ public class FormElementFactoryTest {
     RadioButtonGroup formElement = getTestFormElement("RadioButtonsMandatory");
 
     assertThat(formElement, is(instanceOf(RadioButtonGroup.class)));
-    formElement.setValue("12345");
+    formElement.setValue("value_456");
     assertTrue(formElement.getValidationResult().isEmpty());
-    formElement.setValue("123");
+    formElement.setValue("value_123");
     assertTrue(formElement.getValidationResult().isEmpty());
-    assertThat(formElement.serializeValue(), is("123"));
+    assertThat(formElement.serializeValue(), is("display_123"));
     formElement.setValue("");
     assertThat(formElement.getValidationResult().size(), is(1));
 
@@ -119,10 +124,10 @@ public class FormElementFactoryTest {
 
     assertEquals("myComplexCustomId", formElement.getAdvancedSettings().getCustomId());
     assertEquals(Integer.valueOf(3), formElement.getAdvancedSettings().getColumnWidth());
-    assertEquals(true, formElement.getAdvancedSettings().isBreakAfterElement());
+    assertTrue(formElement.getAdvancedSettings().isBreakAfterElement());
     assertEquals("RadioButtonsOptional", formElement.getAdvancedSettings().getDependentElementId());
-    assertEquals("123", formElement.getAdvancedSettings().getDependentElementValue());
-    assertEquals(true, formElement.getAdvancedSettings().isVisibilityDependent());
+    assertEquals("value_456", formElement.getAdvancedSettings().getDependentElementValue());
+    assertTrue(formElement.getAdvancedSettings().isVisibilityDependent());
   }
 
   @Test
@@ -140,7 +145,7 @@ public class FormElementFactoryTest {
   public void testRadioButtonInvalid() {
     RadioButtonGroup formElement = getTestFormElement("RadioButtonsEmptyValidator");
     //An Exception is expected here
-    formElement.setValue("1234");
+    formElement.setValue("invalid");
     assertThat(formElement.getValidationResult().size(), is(1));
   }
 
@@ -149,11 +154,12 @@ public class FormElementFactoryTest {
     CheckBoxesGroup formElement = getTestFormElement("CheckBoxesMandatory");
 
     assertThat(formElement, is(instanceOf(CheckBoxesGroup.class)));
-    formElement.setValue(Arrays.asList("12345", "123"));
+    formElement.setValue(Arrays.asList("value_123", "value_456"));
     assertTrue(formElement.getValidationResult().isEmpty());
+    assertThat(formElement.serializeValue(), is("[display_123, display_456]"));
+
     formElement.setValue(Collections.emptyList());
     assertThat(formElement.getValidationResult().size(), is(1));
-
     assertThat(formElement.getOptions(), notNullValue());
     assertThat(formElement.getOptions().get(1).isSelectedByDefault(), is(true));
 
@@ -163,7 +169,7 @@ public class FormElementFactoryTest {
   public void testCheckBoxesInvalid() {
     CheckBoxesGroup formElement = getTestFormElement("CheckBoxesEmptyValidator");
     //An Exception is expected here
-    formElement.setValue(Arrays.asList("12", "123"));
+    formElement.setValue(Arrays.asList("invalid", "value_123"));
     assertThat(formElement.getValidationResult().size(), is(1));
   }
 
@@ -172,8 +178,10 @@ public class FormElementFactoryTest {
     SelectBox formElement = getTestFormElement("SelectBoxMandatory");
 
     assertThat(formElement, is(instanceOf(SelectBox.class)));
-    formElement.setValue("123");
+    formElement.setValue("value_123");
     assertTrue(formElement.getValidationResult().isEmpty());
+    assertThat(formElement.serializeValue(), is("display_123"));
+
     formElement.setValue(null);
     assertThat(formElement.getValidationResult().size(), is(1));
 
@@ -183,9 +191,25 @@ public class FormElementFactoryTest {
   public void testSelectBoxesInvalid() {
     SelectBox formElement = getTestFormElement("SelectBoxEmptyValidator");
     //An Exception is expected here
-    formElement.setValue("12");
+    formElement.setValue("invalid");
     formElement.getValidationResult();
   }
+
+  @Test
+  public void testSelectBoxesOnlyDisplayName() {
+    SelectBox formElement = getTestFormElement("SelectBoxOnlyDisplayName");
+
+    assertThat(formElement, is(instanceOf(SelectBox.class)));
+    formElement.setValue("display_123");
+    assertTrue(formElement.getValidationResult().isEmpty());
+    assertThat(formElement.serializeValue(), is("display_123"));
+
+    formElement.setValue(null);
+    assertThat(formElement.getValidationResult().size(), is(1));
+
+  }
+
+
 
   @Test
   public void testTextArea() {
@@ -219,7 +243,7 @@ public class FormElementFactoryTest {
     assertThat(formElement, is(instanceOf(ConsentFormCheckBox.class)));
     assertThat(formElement.getHint(), is("Please confirm the %data protection consent form%"));
     assertNotNull(formElement.getLinkTarget());
-    assertThat(formElement.getLinkTarget().getContentId(), equalTo(6));
+    assertThat(formElement.getLinkTarget().getContentId(), equalTo(8));
   }
 
   @Test
@@ -252,5 +276,57 @@ public class FormElementFactoryTest {
   public void testStreetNumberField() {
     StreetNumberField formElement = getTestFormElement("StreetFieldTest");
     assertEquals(formElement.getName(), "Street and number");
+  }
+
+  @Test
+  public void testDateField_min() {
+    DateField formElement = getTestFormElement("DateFieldMin");
+    assertEquals(formElement.getName(), "DateField min");
+
+    assertThat(formElement, is(instanceOf(DateField.class)));
+    assertFalse(formElement.getValidationResult().isEmpty());
+
+    formElement.setValue("abc");
+    assertThat(formElement.getValidationResult().size(), is(1));
+
+    formElement.setValue(ZonedDateTime.now().minusDays(3).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+    assertThat(formElement.getValidationResult().size(), is(1));
+
+    formElement.setValue(ZonedDateTime.now().plusDays(3).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+    assertThat(formElement.getValidationResult().size(), is(0));
+  }
+
+  @Test
+  public void testDateField_max() {
+    DateField formElement = getTestFormElement("DateFieldMax");
+    assertEquals(formElement.getName(), "DateField max");
+
+    assertThat(formElement, is(instanceOf(DateField.class)));
+    assertFalse(formElement.getValidationResult().isEmpty());
+
+    formElement.setValue("abc");
+    assertThat(formElement.getValidationResult().size(), is(1));
+
+    //using ZondeDateTime here, frontend is sending including time info
+    // max date + 3
+    formElement.setValue(ZonedDateTime.now().plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    assertThat(formElement.getValidationResult().size(), is(1));
+
+    // max date - 3
+    formElement.setValue(ZonedDateTime.now().minusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    assertThat(formElement.getValidationResult().size(), is(0));
+
+    // same date as max date
+    formElement.setValue(ZonedDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    assertThat(formElement.getValidationResult().size(), is(0));
+
+    //same check for different date format
+    formElement.setValue(ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+    assertThat(formElement.getValidationResult().size(), is(0));
+
+    //same check for different date format
+    formElement.setValue(ZonedDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+    assertThat(formElement.getValidationResult().size(), is(0));
+
   }
 }

@@ -27,34 +27,18 @@ import com.tallence.formeditor.cae.elements.FormElement;
 import com.tallence.formeditor.cae.handler.ReCaptchaService;
 import com.tallence.formeditor.cae.handler.ReCaptchaServiceImpl;
 import com.tallence.formeditor.cae.parser.AbstractFormElementParser;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.Scope;
-import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.context.annotation.*;
 
-import javax.servlet.ServletContext;
 import java.util.List;
 
-import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.CACHE;
-import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.CONTENT_BEAN_FACTORY;
-import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.DATA_VIEW_FACTORY;
-import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.HANDLERS;
-import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.ID_PROVIDER;
-import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.LINK_FORMATTER;
+import static com.coremedia.cap.test.xmlrepo.XmlRepoResources.*;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
 /**
  * Configuration class to set up form test infrastructure.
  */
 @Configuration
-@EnableConfigurationProperties({CaeConfigurationProperties.class})
 @ImportResource(
     value = {
         CACHE,
@@ -63,10 +47,12 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
         ID_PROVIDER,
         HANDLERS,
         LINK_FORMATTER,
-        "classpath:/com/tallence/formeditor/contentbeans/formeditor-contentbeans.xml",
+        VIEW_RESOLVER,
+        "classpath:/framework/spring/blueprint-contentbeans.xml",
+        "classpath:/META-INF/coremedia/component-forms.xml",
         "classpath:/framework/spring/blueprint-handlers.xml",
         "classpath:/framework/spring/blueprint-services.xml",
-        "classpath:/framework/spring/blueprint-contentbeans.xml"
+        "classpath:/com/tallence/formeditor/cae/testdata/bundle-replace-context.xml",
     },
     reader = ResourceAwareXmlBeanDefinitionReader.class
 )
@@ -78,42 +64,47 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
     "com.coremedia.objectserver.configuration",
     "com.coremedia.objectserver.web.config"
 })
+@EnableConfigurationProperties({
+        DeliveryConfigurationProperties.class,
+        CaeConfigurationProperties.class
+})
 public class FormTestConfiguration {
 
-    private static final String CONTENT_REPOSITORY = "classpath:/com/tallence/formeditor/cae/testdata/contenttest.xml";
+  private static final String CONTENT_REPOSITORY = "classpath:/com/tallence/formeditor/cae/testdata/contenttest.xml";
 
-    @Bean
-    @Scope(SCOPE_SINGLETON)
-    public XmlUapiConfig xmlUapiConfig() {
-        return new XmlUapiConfig(CONTENT_REPOSITORY);
-    }
+  @Bean
+  @Scope(SCOPE_SINGLETON)
+  public XmlUapiConfig xmlUapiConfig() {
+    return new XmlUapiConfig(CONTENT_REPOSITORY);
+  }
 
-    @Bean
-    @Scope(SCOPE_SINGLETON)
-    public ContentTestHelper contentTestHelper() {
-        return new ContentTestHelper();
-    }
+  @Bean
+  @Scope(SCOPE_SINGLETON)
+  public ContentTestHelper contentTestHelper() {
+    return new ContentTestHelper();
+  }
 
-    @Bean
-    @Scope(SCOPE_SINGLETON)
-    public FormElementFactory formElementFactory(List<AbstractFormElementParser<? extends FormElement>> parsers) {
-        return new FormElementFactory(parsers);
-    }
+  @Bean
+  @Scope(SCOPE_SINGLETON)
+  public FormElementFactory formElementFactory(List<AbstractFormElementParser<? extends FormElement>> parsers) {
+    return new FormElementFactory(parsers);
+  }
 
-    /**
-     * Mocking the {@link ReCaptchaService} it is not yet tested.
-     */
-    @Bean
-    @Scope(SCOPE_SINGLETON)
-    public ReCaptchaService reCaptchaService() {
-        return new ReCaptchaServiceImpl(new ReCaptchaServiceImpl.ReCaptchaAuthentication(null, null));
-    }
+  /**
+   * Mocking the {@link ReCaptchaService} it is not yet tested.
+   */
+  @Bean
+  @Scope(SCOPE_SINGLETON)
+  public ReCaptchaService reCaptchaService() {
+    return new ReCaptchaServiceImpl(new ReCaptchaServiceImpl.ReCaptchaAuthentication(null, null));
+  }
 
-    @Bean
-    @Scope(SCOPE_SINGLETON)
-    public FormFreemarkerFacade freemarkerFacade(FormElementFactory formElementFactory,
-                                                 ReCaptchaService reCaptchaService,
-                                                 CurrentContextService currentContextService) {
-        return new FormFreemarkerFacade(formElementFactory, reCaptchaService, currentContextService);
-    }
+  @Bean
+  @Scope(SCOPE_SINGLETON)
+  public FormFreemarkerFacade freemarkerFacade(FormElementFactory formElementFactory, ReCaptchaService reCaptchaService, CurrentContextService currentContextService) {
+    return new FormFreemarkerFacade(formElementFactory, reCaptchaService, currentContextService);
+  }
+
+
+
 }

@@ -16,7 +16,11 @@
 
 package com.tallence.formeditor.cae.handler;
 
+import com.coremedia.blueprint.cae.web.i18n.RequestMessageSource;
+import com.coremedia.blueprint.cae.web.i18n.ResourceBundleInterceptor;
+import com.coremedia.blueprint.cae.web.links.NavigationLinkSupport;
 import com.coremedia.blueprint.common.contentbeans.CMChannel;
+import com.coremedia.blueprint.common.navigation.Navigation;
 import com.coremedia.blueprint.common.services.context.CurrentContextService;
 import com.coremedia.objectserver.web.links.Link;
 import com.tallence.formeditor.cae.FormFreemarkerFacade;
@@ -24,26 +28,16 @@ import com.tallence.formeditor.cae.actions.DefaultFormAction;
 import com.tallence.formeditor.cae.actions.FormAction;
 import com.tallence.formeditor.cae.elements.FileUpload;
 import com.tallence.formeditor.cae.elements.FormElement;
-import com.tallence.formeditor.cae.elements.TextField;
-import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
-import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
-import com.tallence.formeditor.cae.validator.TextValidator;
+import com.tallence.formeditor.cae.model.FormProcessingResult;
+import com.tallence.formeditor.cae.model.FormSuccessResult;
+import com.tallence.formeditor.cae.model.FormValidationResult;
+import com.tallence.formeditor.cae.serializer.ValidationSerializationHelper;
+import com.tallence.formeditor.cae.validator.ValidationFieldError;
 import com.tallence.formeditor.contentbeans.FormEditor;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -51,9 +45,22 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.coremedia.objectserver.web.HandlerHelper.MODEL_ROOT;
+import static com.tallence.formeditor.cae.handler.FormErrors.RECAPTCHA;
+import static com.tallence.formeditor.cae.handler.FormErrors.SERVER_VALIDATION;
 
 /**
  * Handler for Form-Requests for {@link FormEditor}s.
@@ -61,13 +68,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Link
 @RequestMapping
 @Controller
-public class FormController {
+public class FormController  {
 
   private static final Logger LOG = LoggerFactory.getLogger(FormController.class);
 
   private static final String FORMS_ROOT_URL_SEGMENT = "/d/forms";
 
-  private static final String FORM_EDITOR_SUBMIT_VIEW = "formEditorSubmit";
+  protected static final String FORM_EDITOR_SUBMIT_VIEW = "formEditorSubmit";
   static final String FORM_EDITOR_SUBMIT_URL = FORMS_ROOT_URL_SEGMENT + "/" + FORM_EDITOR_SUBMIT_VIEW + "/{currentContext}/{target}";
 
   private final List<FormAction> formActions;
@@ -75,40 +82,62 @@ public class FormController {
   private final ReCaptchaService recaptchaService;
   private final FormFreemarkerFacade formFreemarkerFacade;
   private final CurrentContextService currentContextService;
+  private final RequestMessageSource messageSource;
+  private final ResourceBundleInterceptor pageResourceBundlesInterceptor;
   private final boolean encodeFormData;
 
-  public FormController(List<FormAction> formActions, DefaultFormAction defaultFormAction, ReCaptchaService recaptchaService,
-                        FormFreemarkerFacade formFreemarkerFacade, CurrentContextService currentContextService,
+  public FormController(List<FormAction> formActions,
+                        DefaultFormAction defaultFormAction,
+                        ReCaptchaService recaptchaService,
+                        FormFreemarkerFacade formFreemarkerFacade,
+                        CurrentContextService currentContextService,
+                        RequestMessageSource messageSource,
+                        ResourceBundleInterceptor pageResourceBundlesInterceptor,
                         @Value("${formEditor.cae.encodeData:true}") boolean encodeFormData) {
     this.formActions = formActions;
     this.defaultFormAction = defaultFormAction;
     this.recaptchaService = recaptchaService;
     this.formFreemarkerFacade = formFreemarkerFacade;
     this.currentContextService = currentContextService;
+    this.messageSource = messageSource;
+    this.pageResourceBundlesInterceptor = pageResourceBundlesInterceptor;
     this.encodeFormData = encodeFormData;
   }
 
-  @Link (type = FormEditor.class, view = FORM_EDITOR_SUBMIT_VIEW, uri = FORM_EDITOR_SUBMIT_URL)
-  public UriComponents buildLinkForSocialForm(FormEditor form, UriComponentsBuilder uriComponentsBuilder) {
+  @Link(type = FormEditor.class, view = FORM_EDITOR_SUBMIT_VIEW, uri = FORM_EDITOR_SUBMIT_URL)
+  public UriComponents buildLinkForFormSubmit(FormEditor form, UriComponentsBuilder uriComponentsBuilder) {
     return uriComponentsBuilder.buildAndExpand(currentContextService.getContext().getContentId(), form.getContentId());
   }
 
   @ResponseBody
-  @RequestMapping(value = FORM_EDITOR_SUBMIT_URL, method = RequestMethod.POST)
-  public FormProcessingResult socialFormAction(@PathVariable CMChannel currentContext,
+  @PostMapping(value = FORM_EDITOR_SUBMIT_URL)
+  public FormProcessingResult socialFormAction(@PathVariable(name = "currentContext") CMChannel navigation,
                                                @PathVariable FormEditor target,
                                                @RequestParam MultiValueMap<String, String> postData,
                                                HttpServletRequest request,
-                                               HttpServletResponse response) throws IOException {
+                                               HttpServletResponse response) throws Exception {
 
-    if (target == null || currentContext == null) {
+    if (target == null || navigation == null) {
       // Log the form data for debugging purpose, wrapped in a LinkedHashMap to make sure, the toString method is overwritten.
       LOG.warn("No form or context document found, cannot handle the request. Form data: {}", new LinkedHashMap<>(postData));
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new FormProcessingResult(false, SERVER_VALIDATION);
     }
 
-    List<FormElement> formElements = getFormElements(target);
+    //set up message interceptor
+    ModelAndView modelAndView = new ModelAndView();
+    modelAndView.addObject(MODEL_ROOT, navigation);
+    pageResourceBundlesInterceptor.postHandle(request, response, null, modelAndView);
+    request.setAttribute(NavigationLinkSupport.ATTR_NAME_CMNAVIGATION, navigation);
+
+    List<FormElement> formElements = formFreemarkerFacade.parseFormElements(target);
+    if (formElements.isEmpty()) {
+      return new FormProcessingResult(
+              false,
+              SERVER_VALIDATION,
+              FormValidationResult.globalError(getMessage("com.tallence.forms.error.empty", navigation)),
+              null);
+    }
 
     parseInputFormData(postData, request, formElements);
     /* CloudTelekom Extension
@@ -134,21 +163,26 @@ public class FormController {
     }
 
     //After all values are set: handle validationResult
-    for (FormElement<?> formElement : visibleAndHiddenElements) {
-      List<String> validationResult = formElement.getValidationResult();
-      if (!validationResult.isEmpty()) {
-        //This should not happen, since a client side validation is expected.
-        LOG.warn("Validation failed for field {} in form {}: {}",formElement.getName(), target.getContentId(), validationResult);
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        return new FormProcessingResult(false, SERVER_VALIDATION);
-      }
+    Map<String, List<String>> validationResults = validateFields(formElements, navigation);
+    if (!validationResults.isEmpty()) {
+      LOG.warn("Validation failed for Form [{}]. Validation-Result: [{}]", target.getContentId(), validationResults);
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new FormProcessingResult(
+              false,
+              SERVER_VALIDATION,
+              new FormValidationResult(null, validationResults),
+              null);
     }
 
     if (target.isSpamProtectionEnabled()) {
-      if (!isHumanByReCaptcha(target, currentContext, postData)) {
+      if (!isHumanByReCaptcha(target, navigation, postData)) {
         LOG.warn("Google reCaptcha detected a bot for Form " + target.getContentId());
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        return new FormProcessingResult(false, RECAPTCHA);
+        return new FormProcessingResult(
+                false,
+                RECAPTCHA,
+                FormValidationResult.globalError(getMessage("com.tallence.forms.error.spamprotection", navigation)),
+                null);
       }
     }
 
@@ -171,26 +205,16 @@ public class FormController {
     //Default for an empty actionKey: the DefaultAction
     String actionKey = target.getFormAction();
     if (!StringUtils.hasText(actionKey)) {
-      return defaultFormAction.handleFormSubmit(target, files, formElements, request, response);
+      return prepareSubmitResult(defaultFormAction.handleFormSubmit(target, files, formElements, request, response), navigation);
     }
 
     Optional<FormAction> optional = formActions.stream().filter((action) -> action.isResponsible(actionKey)).findFirst();
     if (optional.isPresent()) {
-      return optional.get().handleFormSubmit(target, files, formElements, request, response);
+      return prepareSubmitResult(optional.get().handleFormSubmit(target, files, formElements, request, response), navigation);
     } else {
       LOG.error("Cannot find a formAction for configured key [{}] for Form [{}]", actionKey, target.getContentId());
       throw new IllegalStateException("No action configured for form " + target.getContentId() + " with form type " + target.getFormAction());
     }
-  }
-
-  private List<FormElement> getFormElements(FormEditor target) {
-
-    List<FormElement> formElements = formFreemarkerFacade.parseFormElements(target);
-
-    if (formElements.isEmpty()) {
-      throw new IllegalStateException("Studio Form is not configured for Form " + target.getContentId());
-    }
-    return formElements;
   }
 
 
@@ -293,16 +317,33 @@ public class FormController {
             .map(FileUpload.class::cast)
             .collect(Collectors.toList());
     if (!fileFields.isEmpty()) {
-      if (!(request instanceof MultipartHttpServletRequest)) {
-        throw new IllegalStateException(
-            "Request is no instance of org.springframework.web.multipart.MultipartHttpServletRequest, cannot handle MultipartFile Upload for form " +
-                target.getContentId());
-      }
-      MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-      return fileFields.stream().map(e -> processFileInput(multipartRequest, e)).collect(Collectors.toList());
+      return extractMultipartFileRequest(request)
+              .map(r -> fileFields.stream().map(e -> processFileInput(r, e)).collect(Collectors.toList()))
+              .orElseThrow(() ->
+                      new IllegalStateException("Request is no instance of org.springframework.web.multipart.MultipartHttpServletRequest, cannot handle MultipartFile Upload for form " +
+                              target.getContentId()));
     } else {
       return Collections.emptyList();
     }
+  }
+
+  /**
+   * Extract the {@link MultipartHttpServletRequest} out of the spring security request object structure.
+   * The MultipartFile cannot be fetched via {@link RequestParam} because the name is dynamic: based on the FileUploadField name.
+   * @return the MultipartHttpServletRequest if available
+   */
+  private Optional<MultipartHttpServletRequest> extractMultipartFileRequest(HttpServletRequest request) {
+
+    ServletRequest tmpReq = request;
+    do {
+      if (tmpReq instanceof MultipartHttpServletRequest) {
+        return Optional.of((MultipartHttpServletRequest) tmpReq);
+      } else if (tmpReq instanceof ServletRequestWrapper) {
+        tmpReq = ((ServletRequestWrapper) tmpReq).getRequest();
+      }
+    } while (tmpReq != null);
+
+    return Optional.empty();
   }
 
   private MultipartFile processFileInput(MultipartHttpServletRequest multipartRequest, FileUpload fileUpload) {
@@ -310,7 +351,6 @@ public class FormController {
     fileUpload.setValue(file);
     return file;
   }
-
 
   /**
    * Validates the generated response-token in postData
@@ -328,23 +368,42 @@ public class FormController {
     }
   }
 
-  public static class FormProcessingResult {
-
-    private final Boolean success;
-    private final String error;
-
-    public FormProcessingResult(Boolean success, String error) {
-      this.success = success;
-      this.error = error;
-    }
-
-    public Boolean isSuccess() {
-      return success;
-    }
-
-    public String getError() {
-      return error;
-    }
+  private Map<String, List<String>> validateFields(List<FormElement> formElements, Navigation page) {
+    Map<String, List<String>> validationResults = new HashMap<>();
+    formElements.forEach(f -> {
+      List<ValidationFieldError> validationResult = f.getValidationResult();
+      if (!validationResult.isEmpty()) {
+        validationResults.put(f.getTechnicalName(), validationResult.stream()
+                .map(error -> ValidationSerializationHelper.getValidationMessage(
+                        f.getName(),
+                        error,
+                        (key, args) -> messageSource.getMessage(key, args, page.getLocale())))
+                .collect(Collectors.toList()));
+      }
+    });
+    return validationResults;
   }
 
+  private FormProcessingResult prepareSubmitResult(FormProcessingResult processingResult, Navigation navigation) {
+    if (processingResult.isSuccess() && processingResult.getSuccessData() == null) {
+      processingResult.setSuccessData(new FormSuccessResult(
+              getMessage("com.tallence.forms.label.success.page.title", navigation),
+              getMessage("com.tallence.forms.label.success.page.text", navigation),
+              getMessage("com.tallence.forms.label.success.page.button", navigation)
+      ));
+    }
+    if (processingResult.getError() != null && processingResult.getErrorData() == null) {
+      processingResult.setErrorData(FormValidationResult.globalError(getMessage("com.tallence.forms.error.general", navigation)));
+    }
+    return processingResult;
+  }
+
+
+  private String getMessage(String messageKey, Navigation navigation) {
+    try {
+      return messageSource.getMessage(messageKey, null, navigation.getLocale());
+    } catch (NoSuchMessageException x) {
+      return messageKey; //simply return the message key instead of "crashing"
+    }
+  }
 }

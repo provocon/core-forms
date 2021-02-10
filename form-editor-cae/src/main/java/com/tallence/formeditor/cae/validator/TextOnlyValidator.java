@@ -25,7 +25,7 @@ import java.util.List;
 public class TextOnlyValidator implements Validator<String> {
 
   @Override
-  public List<String> validate(String value) {
+  public List<ValidationFieldError> validate(String value) {
     return Collections.emptyList();
   }
 
