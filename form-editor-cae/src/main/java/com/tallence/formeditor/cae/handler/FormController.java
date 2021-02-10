@@ -335,7 +335,7 @@ public class FormController  {
    * The MultipartFile cannot be fetched via {@link RequestParam} because the name is dynamic: based on the FileUploadField name.
    * @return the MultipartHttpServletRequest if available
    */
-  private Optional<MultipartHttpServletRequest> extractMultipartFileRequest(HttpServletRequest request) {
+  public static Optional<MultipartHttpServletRequest> extractMultipartFileRequest(HttpServletRequest request) {
 
     ServletRequest tmpReq = request;
     do {
