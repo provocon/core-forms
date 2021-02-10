@@ -269,7 +269,6 @@ public class FormControllerTest {
         .param("AdditionalParameter", "affiliateCode")
     )
         .andExpect(status().is2xxSuccessful())
-        .andExpect(content().string(SUCCESS_RESPONSE))
         .andDo(MockMvcResultHandlers.print());
 
     String withNewField = FORM_DATA_SERIALIZED.replace("RadioOptional: <br/>", "DependentField: testValue<br/>RadioOptional: display_456<br/>");

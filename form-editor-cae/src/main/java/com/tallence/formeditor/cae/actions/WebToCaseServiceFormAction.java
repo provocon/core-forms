@@ -1,7 +1,7 @@
 package com.tallence.formeditor.cae.actions;
 
 import com.tallence.formeditor.cae.elements.FormElement;
-import com.tallence.formeditor.cae.handler.FormController.FormProcessingResult;
+import com.tallence.formeditor.cae.model.FormProcessingResult;
 import com.tallence.formeditor.contentbeans.FormEditor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,10 +52,10 @@ public class WebToCaseServiceFormAction implements FormAction {
     // -------------------------------------------------------------------------------------------------------------------
     @Override
     public FormProcessingResult handleFormSubmit(FormEditor target,
-            List<MultipartFile> files,
-            List<FormElement> formElements,
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+                                                 List<MultipartFile> files,
+                                                 List<FormElement> formElements,
+                                                 HttpServletRequest request,
+                                                 HttpServletResponse response) throws IOException {
 
         FormProcessingResult processingResult = new FormProcessingResult(true, null);
 

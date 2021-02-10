@@ -1,7 +1,7 @@
 package com.tallence.formeditor.cae.actions;
 
 import com.tallence.formeditor.cae.elements.FormElement;
-import com.tallence.formeditor.cae.handler.FormController.FormProcessingResult;
+import com.tallence.formeditor.cae.model.FormProcessingResult;
 import static com.tallence.formeditor.cae.handler.FormErrors.ADMIN_MAIL;
 import static com.tallence.formeditor.cae.handler.FormErrors.SF_SAVE;
 import com.tallence.formeditor.contentbeans.FormEditor;

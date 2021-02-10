@@ -1,7 +1,7 @@
 package com.tallence.formeditor.cae.actions;
 
 import com.tallence.formeditor.cae.elements.FormElement;
-import com.tallence.formeditor.cae.handler.FormController.FormProcessingResult;
+import com.tallence.formeditor.cae.model.FormProcessingResult;
 import com.tallence.formeditor.contentbeans.FormEditor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
