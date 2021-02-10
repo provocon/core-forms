@@ -343,6 +343,8 @@ public class FormController  {
         return Optional.of((MultipartHttpServletRequest) tmpReq);
       } else if (tmpReq instanceof ServletRequestWrapper) {
         tmpReq = ((ServletRequestWrapper) tmpReq).getRequest();
+      } else {
+        tmpReq = null;
       }
     } while (tmpReq != null);
 
